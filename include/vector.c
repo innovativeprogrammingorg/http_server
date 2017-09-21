@@ -1,5 +1,13 @@
 #include "vector.h"
 
+static Vector createVector(){
+	Vector out = (Vector) malloc(sizeof(struct vect));
+	out->next = NULL;
+	out->prev = NULL;
+	out->data = NULL;
+	return out;
+}
+
 size_t vector_length(Vector v){
 	size_t length = 0;
 	Vector tmp = v;
@@ -36,6 +44,14 @@ void vector_pop(Vector* v, size_t index){
 	Vector tmp = *v;
 	Vector p;
 	int i = 0;
+	if(index == 0){
+		*v = tmp->next;
+		free(tmp);
+		if(*v != NULL){
+			(*v)->prev = NULL;
+		}
+		return;
+	}
 	while(i !=  index && tmp != NULL){
 		tmp = tmp->next;
 		i++;
@@ -46,13 +62,7 @@ void vector_pop(Vector* v, size_t index){
 	free(tmp);
 }
 
-Vector createVector(){
-	Vector out = (Vector) malloc(sizeof(struct vect));
-	out->next = NULL;
-	out->prev = NULL;
-	out->data = NULL;
-	return out;
-}
+
 
 void vector_push(Vector * v,void* data){
 	Vector add = createVector();

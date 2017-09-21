@@ -12,11 +12,19 @@ Vector explode(char * quan,char * subject){
 	for(i = 0;i<slength-qlength;i++){
 		if(strcompsub(quan,subj,i,qlength)){
 			vector_push(&out,substring(subj,0,i));
-			subj = substr_f(subj,i);
+			subj = substr_f(subj,i+1);
 			i = 0;
 			slength = strlen(subj);
 		}
 	}
+	return out;
+}
+
+Vector split(char quan,char * subject){
+	Vector out = NULL;
+	int index = indexOfChar(subject,quan);
+	vector_push(&out,substring(subject,0,index));
+	vector_push(&out,substr(subject,index+1));
 	return out;
 }
 
@@ -101,6 +109,8 @@ char * substring(char * subject,size_t index,int length){
 	out[i] = '\0';
 	return out;
 }
+
+
 char * substr_r(char * subject,int index){
 	register uint_fast64_t length = strlen(subject);
 	char * out;
@@ -196,7 +206,7 @@ int strpos(char * haystack, char * needle){
 	size_t length = strlen(haystack);
 	size_t nlength = strlen(needle);
 	register uint_fast64_t i;
-	if(length == 0||nlength>=length){
+	if(length == 0||nlength>length){
 		return -1;
 	}
 	for(i = 0;i<=length-nlength;i++){
@@ -217,3 +227,20 @@ int indexOfChar(char * haystack, char needle){
 	return -1;
 }
 
+char * trim(char* str){
+	register uint_fast32_t start = 0;
+	register uint_fast32_t end = strlen(str);
+	while(str[start] == '\n' || str[start]== '\r' || str[start]==' '){
+		start++;
+	}
+	while(str[end] == '\n' || str[end]=='\r' || str[end]==' '){
+		end--;
+	}
+	if(end-start ==0){
+		printf("ERROR was found when trimming: %s\n",str);
+		exit(EXIT_FAILURE);
+	}
+	char* out = substring(str,start,end-start);
+	free(str);
+	return out;
+}

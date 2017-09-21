@@ -1,7 +1,7 @@
 #include "map.h"
 
 static Map createMap(){
-	Map out = NULL;
+	Map out = (Map)malloc(sizeof(struct map));
 	out->head = NULL;
 	return out;
 }
@@ -11,7 +11,7 @@ static Meta createMeta(){
 	out->value = NULL;
 	out->next = NULL;
 	out->prev = NULL;
-	is_array = FALSE;
+	out->is_array = FALSE;
 	return out;
 }
 
@@ -29,12 +29,12 @@ uint8_t map_has_key(Map m, char* key){
 void map_add(Map* m, char* key, void* value){
 	Meta add = createMeta();
 	Meta tmp;
-	add->data = data;
+	add->value = value;
 	add->key = (char*)calloc(sizeof(char),strlen(key)+1);
 	memcpy(add->key,key,strlen(key)+1);
 	if(m==NULL||*m==NULL){
 		*m = createMap();
-		m->head = add;
+		(*m)->head = add;
 		return;
 	}
 
@@ -49,13 +49,13 @@ void map_add(Map* m, char* key, void* value){
 void map_add_array(Map* m, char* key, void* value){
 	Meta add = createMeta();
 	Meta tmp;
-	add->data = data;
+	add->value = value;
 	add->key = (char*)calloc(sizeof(char),strlen(key)+1);
-	add->is_array = true;
+	add->is_array = TRUE;
 	memcpy(add->key,key,strlen(key)+1);
 	if(m==NULL||*m==NULL){
 		*m = createMap();
-		m->head = add;
+		(*m)->head = add;
 		return;
 	}
 
@@ -68,20 +68,20 @@ void map_add_array(Map* m, char* key, void* value){
 }
 
 void map_clean(Map m){
-	Meta tmp = m->head;
+	Meta tmp;
 	Meta clear = NULL;
-	if(v==NULL){
+	if(m==NULL){
 		return;
 	}
-	
+	tmp = m->head;
 	while(tmp->next != NULL){
 		tmp = tmp->next;
 		clear = tmp->prev;
 		clear->next = NULL;
 		clear->prev = NULL;
-		free(clear->data);
+		free(clear->value);
 		free(clear->key);
-		clear->data = NULL;
+		clear->value = NULL;
 		clear->key = NULL;
 		free(clear);
 	}
@@ -110,12 +110,17 @@ void map_remove(Map* m, char* key){
 	free(tmp);
 }
 
-void* map_value_at(Map *m, char* key){
-	Vector tmp = v;
+void* map_value_at(Map m, char* key){
+	Meta tmp;
+	if(m == NULL){
+		puts("Error map is null");
+		return NULL;
+	}
+	tmp = m->head;
 	while(!strcompare(key,tmp->key) && tmp != NULL){
 		tmp = tmp->next;
 	}
-	return tmp->data;
+	return tmp->value;
 }
 
 size_t map_size(Map m){
@@ -141,4 +146,44 @@ char** map_get_keys(Map m){
 		tmp = tmp->next;
 	}
 	return keys;
+}
+
+void print_map_contents(Map m, char obj){
+	size_t size = map_size(m);
+	int i = 0;
+	Meta tmp;
+	int j = 0;
+	if(m==NULL){
+		puts("Map is NULL");
+		return;
+	}
+	tmp = m->head;
+	for(i = 0;i<size;i++){
+		printf("%s=>",tmp->key);
+		if(tmp->is_array){
+			j = 0;
+			printf("[");
+			while((char*)((char**)tmp->value)[j]){
+				if(j != 0){
+					printf(",");
+				}
+				printf("\n");
+				switch(obj){
+					case 's':
+						printf("%d=>%s",j,(char*)((char**)tmp->value)[j]);
+						break;
+				}
+				j++;
+			}
+			printf("]");
+		}else{
+			switch(obj){
+				case 's':
+					printf("%s\n",(char*)tmp->value);
+					break;
+			}
+		}
+		printf("\n");
+		tmp = tmp->next;
+	}
 }

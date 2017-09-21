@@ -4,6 +4,13 @@ int * intmemcopy(int * ptr){
 	*out = *ptr;
 	return out;
 }
+char * last_input = NULL;
+
+void segfault_catch(int signum){
+	printf("The last received is : \n %s \n",last_input);
+	exit(EXIT_FAILURE);
+}
+
 int main(){
 	int opt = TRUE;
 	int master_socket , addrlen , new_socket , activity, i , valread , sd;
@@ -16,7 +23,8 @@ int main(){
 	fd_set readfds;
 	int cons = 0;
 	char * out;
-	  
+	Map headers = NULL;
+	signal(SIGSEGV,segfault_catch);
 	if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) {
 		perror("socket failed");
 		exit(EXIT_FAILURE);
@@ -39,14 +47,14 @@ int main(){
 		exit(EXIT_FAILURE);
 	}
 
-	printf("Listener on port %d \n", port);
+	/*printf("Listener on port %d \n", port);*/
 	 
 	
 	if (listen(master_socket, 10) < 0){
 		perror("listen");
 		exit(EXIT_FAILURE);
 	}
-	puts("Listener created successfully");
+	/*puts("Listener created successfully");*/
 	
 	addrlen = sizeof(address);	 
 	while(TRUE) {
@@ -66,7 +74,7 @@ int main(){
 			if(sd > max_sd)
 				max_sd = sd;
 		}
-  		printf("The max process id is %i\n",max_sd);
+  		/*printf("The max process id is %i\n",max_sd);*/
 		activity = select(max_sd + 1 , &readfds , NULL , NULL , NULL);
 	
 		if ((activity < 0) && (errno!=EINTR)) {
@@ -83,24 +91,27 @@ int main(){
 			continue;
 		}
 		for (i = 0; i < cons; i++){
-			printf("Checking on user %i\n",i);
+			/*printf("Checking on user %i\n",i);*/
 			sd = *((int *)vector_get(clients,i));
-			printf("Retrieved the socket of that user\n");
+			/*printf("Retrieved the socket of that user\n");*/
 			if (FD_ISSET( sd , &readfds)){
-				printf("Checking to see what action occured...\n");
+				/*printf("Checking to see what action occured...\n");*/
 				if ((valread = read( sd , buffer, 2048)) == 0){
-					printf("Removing the User from the list\n");
+					/*printf("Removing the User from the list\n");*/
 					vector_pop(&clients,i);
-					printf("Removed Successfully!\n");
+					/*printf("Removed Successfully!\n");*/
 					cons--;
 					close(sd);
 					i = 0;
 				}else{
 					for (j = 0; j < cons; j++){
 						sd = *((int *)vector_get(clients,j));
-						printf("The socket number for this message is %i\n",sd);
+						/*printf("The socket number for this message is %i\n",sd);*/
 						buffer[valread] = '\0';
-						write(0, buffer, strlen(buffer));
+						last_input = buffer;
+						respond(sd,build_response(parse_HTTP_Header(buffer)));
+						//print_map_contents(headers, 's');
+						//write(0, buffer, strlen(buffer));
 					}
 					
 				}

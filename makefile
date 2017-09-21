@@ -1,6 +1,6 @@
 
 
-CFLAGS += -Wall -Werror --pedantic
+CFLAGS += -Wall -Werror --pedantic -lm -lssl -lcrypto
 CC= gcc
 LIB = -I /usr/local/lib/
 CFLAGS =  -pthread $(LIB) $(INCLUDE)

@@ -16,7 +16,6 @@ void* vector_get(Vector v,size_t index);
 void vector_clean(Vector v);
 void vector_push(Vector* v,void* data);
 Vector vector_merge(Vector* v1, Vector* v2);
-Vector createVector();
 void vector_pop(Vector* v, size_t index);
 void* vector_get_f(Vector v,size_t index);
 void vector_print_i(Vector v1);

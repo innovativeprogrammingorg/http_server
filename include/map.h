@@ -12,7 +12,7 @@ typedef struct meta * Meta;
 
 struct meta{
 	char* key;
-	void* data;
+	void* value;
 	Meta next;
 	Meta prev;
 	uint8_t is_array;
@@ -30,10 +30,11 @@ uint8_t map_has_key(Map m, char* key);
 void map_add(Map* m, char* key, void* value);
 void map_add_array(Map* m, char* key, void* value);
 void map_remove(Map* m, char* key);
-void* map_value_at(Map *m, char* key);
+void* map_value_at(Map m, char* key);
 char** map_get_keys(Map m);
 size_t map_size(Map m);
 void map_clean(Map m);
+void print_map_contents(Map m, char obj);
 
 #ifndef TRUE
 #define TRUE 1

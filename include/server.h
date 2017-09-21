@@ -1,5 +1,6 @@
 #ifndef _SERVER_H_
 #define _SERVER_H_
+
 #include <stdio.h>
 #include <string.h>   
 #include <stdlib.h>
@@ -13,15 +14,31 @@
 #include <netdb.h> /* struct hostent, gethostbyname */
 #include "str.h"
 #include "vector.h"
+#include "map.h"
+#include "header.h"
+#include "request.h"
+#include <signal.h>
+#include "io.h"
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/pem.h>
+#include <openssl/x509.h>
+#include <openssl/x509_vfy.h>
+#include <resolv.h>
+#include "base64.h"
 
 #ifndef TRUE
 #define TRUE   1
 #endif
+
 #ifndef FALSE
 #define FALSE  0
 #endif
+
 #define BUFFER_SIZE 20000 
 
 int expo(int n,int i);
+void segfault_catch(int signum);
 
 #endif

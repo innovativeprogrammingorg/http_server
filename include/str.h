@@ -8,6 +8,7 @@
 #include "vector.h"
 
 Vector explode(char * quan,char * subject);
+Vector split(char quan,char * subject);
 char* str_reverse(char* str);
 char* substring(char * subject,size_t index,int length);
 char* substr(char * subject,int index);
@@ -24,6 +25,8 @@ char* stradd(char * str,char s);
 char* itoa(uint32_t num);
 char getLast(char * str);
 int indexOfChar(char * haystack, char needle);
+char * trim(char* str);
+
 
 #define TRUE 1
 #define FALSE 0
