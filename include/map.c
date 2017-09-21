@@ -11,7 +11,7 @@ static Meta createMeta(){
 	out->value = NULL;
 	out->next = NULL;
 	out->prev = NULL;
-	out->is_array = FALSE;
+	out->type = STRING_TYPE;
 	return out;
 }
 
@@ -26,39 +26,18 @@ uint8_t map_has_key(Map m, char* key){
 	return FALSE;
 }
 
-void map_add(Map* m, char* key, void* value){
+void map_add(Map* m, char* key, void* value,uint8_t type){
 	Meta add = createMeta();
 	Meta tmp;
 	add->value = value;
 	add->key = (char*)calloc(sizeof(char),strlen(key)+1);
+	add->type = type;
 	memcpy(add->key,key,strlen(key)+1);
 	if(m==NULL||*m==NULL){
 		*m = createMap();
 		(*m)->head = add;
 		return;
 	}
-
-	tmp = (*m)->head;
-	while(tmp->next != NULL){
-		tmp = tmp->next;
-	}
-	tmp->next = add;
-	add->prev = tmp;
-}
-
-void map_add_array(Map* m, char* key, void* value){
-	Meta add = createMeta();
-	Meta tmp;
-	add->value = value;
-	add->key = (char*)calloc(sizeof(char),strlen(key)+1);
-	add->is_array = TRUE;
-	memcpy(add->key,key,strlen(key)+1);
-	if(m==NULL||*m==NULL){
-		*m = createMap();
-		(*m)->head = add;
-		return;
-	}
-
 	tmp = (*m)->head;
 	while(tmp->next != NULL){
 		tmp = tmp->next;
@@ -132,6 +111,7 @@ size_t map_size(Map m){
 	}
 	return size;
 }
+
 char** map_get_keys(Map m){
 	size_t size = map_size(m);
 	char** keys = (char **)calloc(sizeof(char*),size+1);
@@ -148,7 +128,7 @@ char** map_get_keys(Map m){
 	return keys;
 }
 
-void print_map_contents(Map m, char obj){
+void print_map_contents(Map m){
 	size_t size = map_size(m);
 	int i = 0;
 	Meta tmp;
@@ -160,28 +140,25 @@ void print_map_contents(Map m, char obj){
 	tmp = m->head;
 	for(i = 0;i<size;i++){
 		printf("%s=>",tmp->key);
-		if(tmp->is_array){
-			j = 0;
-			printf("[");
-			while((char*)((char**)tmp->value)[j]){
-				if(j != 0){
-					printf(",");
+		switch(tmp->type){
+			case ARRAY_TYPE:
+				j = 0;
+				printf("[");
+				while((char*)((char**)tmp->value)[j]){
+					if(j != 0){
+						printf(",");
+					}
+					printf("\n%d=>%s",j,(char*)((char**)tmp->value)[j]);		
+					j++;
 				}
-				printf("\n");
-				switch(obj){
-					case 's':
-						printf("%d=>%s",j,(char*)((char**)tmp->value)[j]);
-						break;
-				}
-				j++;
-			}
-			printf("]");
-		}else{
-			switch(obj){
-				case 's':
-					printf("%s\n",(char*)tmp->value);
-					break;
-			}
+				puts("]");
+				break;
+			case MAP_TYPE:
+				print_map_contents(tmp->value);
+				break;
+			case STRING_TYPE:
+				printf("%s\n",(char*)tmp->value);
+
 		}
 		printf("\n");
 		tmp = tmp->next;

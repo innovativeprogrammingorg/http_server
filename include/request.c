@@ -48,20 +48,18 @@ char* GET_response(Map header){
 		content_length = sread_file(directory,&body);
 	}
 	head = concat(head,get_date_line(),SECOND);
-	
 	head = concat(head,get_content_length_line(content_length),FIRST|SECOND);
-
 	head = concat(head,get_connection_line(header),FIRST);
 	head = concat(head,get_server_line(),FIRST);
 	
 	//head = concat(head,get_vary_line(),FIRST);
-	
-
 	return concat(head,concat("\r\n",body,FALSE),FIRST|SECOND);
 }
 
-char* POST_response(Map header){
-	print_map_contents(header, 's');
+char* POST_response(Map message){
+	char* directory = get_requested_directory((Map)map_value_at(message,"HEADER"));
+	directory = concat("./www",directory,SECOND);
+	
 	return NULL;
 }
 

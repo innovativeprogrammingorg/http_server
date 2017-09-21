@@ -10,7 +10,9 @@
 #include <time.h>
 
 
-Map parse_HTTP_Header(char * header);
+Map parse_HTTP_header(char * header);
+Map parse_HTTP_body(char * body);
+Map parse_HTTP_message(char * message);
 char * get_status_line(int status);
 /**
  * Checks if the header received is valid

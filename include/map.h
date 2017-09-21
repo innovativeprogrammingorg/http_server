@@ -15,7 +15,7 @@ struct meta{
 	void* value;
 	Meta next;
 	Meta prev;
-	uint8_t is_array;
+	uint8_t type;
 };
 /**
  * Map is used to connect keys to values, keys must be char*, values are of type void*
@@ -27,14 +27,13 @@ struct map{
 };
 
 uint8_t map_has_key(Map m, char* key);
-void map_add(Map* m, char* key, void* value);
-void map_add_array(Map* m, char* key, void* value);
+void map_add(Map* m, char* key, void* value,uint8_t type);
 void map_remove(Map* m, char* key);
 void* map_value_at(Map m, char* key);
 char** map_get_keys(Map m);
 size_t map_size(Map m);
 void map_clean(Map m);
-void print_map_contents(Map m, char obj);
+void print_map_contents(Map m);
 
 #ifndef TRUE
 #define TRUE 1
@@ -42,6 +41,26 @@ void print_map_contents(Map m, char obj);
 
 #ifndef FALSE
 #define FALSE 0
+#endif
+
+#ifndef STRING_TYPE
+#define STRING_TYPE 0
+#endif
+
+#ifndef MAP_TYPE
+#define MAP_TYPE 1
+#endif
+
+#ifndef ARRAY_TYPE
+#define ARRAY_TYPE 2
+#endif
+
+#ifndef VECTOR_TYPE
+#define VECTOR_TYPE 3
+#endif
+
+#ifndef INTEGER_TYPE
+#define INTEGER_TYPE 4
 #endif
 
 #endif

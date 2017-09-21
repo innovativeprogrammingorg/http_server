@@ -17,28 +17,21 @@ char* convertToBinary(char* input){
 	size_t length = strlen(input);
 	char * out = calloc(sizeof(char),length*8 + 1);
 	uint64_t i = 0;
-	char tmp;
+	uint8_t tmp;
 	for(i = 0;i<length;i++){
-		tmp = input[i];
-		out[8*i + 7] = (tmp%2)? '1' : '0';
-		tmp = tmp/2;
-		out[8*i + 6] = (tmp%2)? '1' : '0';
-		tmp = tmp/2;
-		out[8*i + 5] = (tmp%2)? '1' : '0';
-		tmp = tmp/2; 
-		out[8*i + 4] = (tmp%2)? '1' : '0';
-		tmp = tmp/2;
-		out[8*i + 3] = (tmp%2)? '1' : '0';
-		tmp = tmp/2;
-		out[8*i + 2] = (tmp%2)? '1' : '0';
-		tmp = tmp/2;
-		out[8*i + 1] = (tmp%2)? '1' : '0';
-		tmp = tmp/2;
-		out[8*i    ] = (tmp%2)? '1' : '0';
+		tmp = (uint8_t)input[i];
+		out[8*i    ] = (tmp & 128)? '1' : '0';
+		out[8*i + 1] = (tmp &  64)? '1' : '0';
+		out[8*i + 2] = (tmp &  32)? '1' : '0';
+		out[8*i + 3] = (tmp &  16)? '1' : '0';
+		out[8*i + 4] = (tmp &   8)? '1' : '0';
+		out[8*i + 5] = (tmp &   4)? '1' : '0';
+		out[8*i + 6] = (tmp &   2)? '1' : '0';
+		out[8*i + 7] = (tmp &   1)? '1' : '0';
 	}
 	return out;
 }
-char* convertToBase64(char * input){
+char* convertToBase64(char* input){
 	char* binary = convertToBinary(input);
 	size_t output_size = strlen(binary)/6 + ((strlen(binary)%6 == 0)? 0 : 1);
 	uint64_t i = 0;
@@ -57,7 +50,6 @@ char* convertToBase64(char * input){
 		tmp = 0;
 	}
 	left_over = (uint8_t)(strlen(binary)%6);
-	printf("Left over is %u\n",left_over);
 	if(left_over != 0){
 		out[output_size] = '=';
 		if(left_over == 2){

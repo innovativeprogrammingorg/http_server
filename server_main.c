@@ -7,13 +7,19 @@ int * intmemcopy(int * ptr){
 char * last_input = NULL;
 
 void segfault_catch(int signum){
-	printf("The last received is : \n %s \n",last_input);
+	puts("Server encountered a segmentation fault");
+	printf("The last received is : \n%s \n",last_input);
 	exit(EXIT_FAILURE);
+}
+
+void kill_all(int signum){
+	puts("Killed");
+	exit(EXIT_SUCCESS);
 }
 
 int main(){
 	int opt = TRUE;
-	int master_socket , addrlen , new_socket , activity, i , valread , sd;
+	int master_socket , addrlen , new_socket, activity, i , valread , sd;
 	int max_sd;
 	int port = 8989;
 	int j;
@@ -25,6 +31,7 @@ int main(){
 	char * out;
 	Map headers = NULL;
 	signal(SIGSEGV,segfault_catch);
+	signal(SIGINT,kill_all);
 	if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) {
 		perror("socket failed");
 		exit(EXIT_FAILURE);
@@ -47,10 +54,8 @@ int main(){
 		exit(EXIT_FAILURE);
 	}
 
-	/*printf("Listener on port %d \n", port);*/
-	 
-	
-	if (listen(master_socket, 10) < 0){
+	/*printf("Listener on port %d \n", port);*/	
+	if (listen(master_socket, 200) < 0){
 		perror("listen");
 		exit(EXIT_FAILURE);
 	}
@@ -66,8 +71,6 @@ int main(){
 		
 		for (i = 0 ; i < cons ; i++) {
 			sd = *((int *)vector_get(clients,i));
-			 
-			
 			if(sd > 0)
 				FD_SET(sd,&readfds);
 			 
@@ -76,11 +79,9 @@ int main(){
 		}
   		/*printf("The max process id is %i\n",max_sd);*/
 		activity = select(max_sd + 1 , &readfds , NULL , NULL , NULL);
-	
 		if ((activity < 0) && (errno!=EINTR)) {
 			printf("select error");
 		}
-		  
 		if (FD_ISSET(master_socket, &readfds)){
 			if ((new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0){
 				perror("accept");
@@ -109,7 +110,7 @@ int main(){
 						/*printf("The socket number for this message is %i\n",sd);*/
 						buffer[valread] = '\0';
 						last_input = buffer;
-						respond(sd,build_response(parse_HTTP_Header(buffer)));
+						respond(sd,build_response(parse_HTTP_message(buffer)));
 						//print_map_contents(headers, 's');
 						//write(0, buffer, strlen(buffer));
 					}
@@ -117,9 +118,7 @@ int main(){
 				}
 			}
 		}
-		
 		memset(&buffer,0,2048);
 	}
-	  
-	return 0;
+	return EXIT_SUCCESS;
 } 

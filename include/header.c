@@ -1,8 +1,35 @@
 #include "header.h"
+Map parse_HTTP_body(char * body){
+	Vector data = explode("&",body);
+	size_t length = vector_length(data);
+	Map out = NULL;
+	uint64_t i;
+	Vector pair;
+	for(i = 0;i<length;i++){
+		pair = split(':',(char*)vector_get(data,i));
+		map_add(&out,vector_get(pair,0),vector_get(pair,1),STRING_TYPE);
+		vector_clean(pair);
+	}
+	return out;
+}
 
-Map parse_HTTP_Header(char * header){
-	/*puts("Parsing the HTTP header");
-	printf("\n\n\n\n%s\n\n\n\n",header);*/
+Map parse_HTTP_message(char * message){
+	if(strpos(message,"GET")==0){
+		return parse_HTTP_header(message);
+	}	
+	Map out = NULL;
+	Vector v = explode("\r\n\r\n",message);
+	Map header = parse_HTTP_header(vector_get(v,0));
+	
+	
+	map_add(&out,"HEADER",header,MAP_TYPE);
+	map_add(&out,"BODY",parse_HTTP_body(vector_get(v,1)),MAP_TYPE);
+	
+	return out;
+}
+Map parse_HTTP_header(char * header){
+	/*puts("Parsing the HTTP header");*/
+	//printf("\n\n\n\n%s\n\n\n\n",header);
 	Vector parameters = explode("\r\n",header);
 	size_t length = vector_length(parameters);
 	int i = 0;
@@ -20,37 +47,33 @@ Map parse_HTTP_Header(char * header){
 			tmp = (char*)vector_get(parameters,i);
 			value = malloc(sizeof(char*)*(strlen(tmp)));
 			strcpy((char*)value,tmp);
-			map_add(&out,key,value);
+			map_add(&out,key,value,STRING_TYPE);
 		}else{
 			key_value_pair = split(':',vector_get(parameters,i));
-			key = (char*)vector_get(key_value_pair,0);
-			key = trim(key);
+			key = trim((char*)vector_get(key_value_pair,0));
 			value = (char*)malloc(sizeof(char*)*(strlen((char*)vector_get(key_value_pair,1)) + 1));
-			
-			
+		
 			strcpy(value,(char*)vector_get(key_value_pair,1));
 			value = trim(value);
 			//printf("Value is %s\n",(char*)value);
 			if(strpos(key,"User-Agent")!=-1){
-				map_add(&out,key,value);
-			//	printf("Added %s:%s\n",key,(char*)value);
+				map_add(&out,key,value,STRING_TYPE);
 				//printf("Added %s:%s\n",key,(char*)value);
 			}else if(indexOfChar((char*)value,';')!=-1){
 				/*puts("Value is an array delim = ;");
 				printf("Key is %s\n",key);*/
 				value =  vector_to_array(explode(";",(char*)value));
-				map_add_array(&out,key,value);
+				map_add(&out,key,value,ARRAY_TYPE);
 			}else if(indexOfChar((char*)value,',')!=-1){
 				/*puts("Value is an array delim = ,");
 				printf("Key is %s\n",key);*/
 				value =  vector_to_array(explode(",",(char*)value));
-				map_add_array(&out,key,value);
+				map_add(&out,key,value,ARRAY_TYPE);
 			}else{
-				map_add(&out,key,value);
+				map_add(&out,key,value,STRING_TYPE);
 				//printf("Added %s:%s\n",key,(char*)value);
 			}
 		}
-		//printf("Parsed parameter %d/%lu\n",i,length);
 	}
 	return out;
 }
@@ -173,5 +196,3 @@ char* build_response(Map m){
 	}
 	return NULL;
 }	
-
-
