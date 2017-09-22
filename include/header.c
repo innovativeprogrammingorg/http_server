@@ -6,7 +6,7 @@ Map parse_HTTP_body(char * body){
 	uint64_t i;
 	Vector pair;
 	for(i = 0;i<length;i++){
-		pair = split(':',(char*)vector_get(data,i));
+		pair = split('=',(char*)vector_get(data,i));
 		map_add(&out,vector_get(pair,0),vector_get(pair,1),STRING_TYPE);
 		vector_clean(pair);
 	}
@@ -18,8 +18,7 @@ Map parse_HTTP_message(char * message){
 		return parse_HTTP_header(message);
 	}	
 	Map out = NULL;
-
-	Vector v = explode("\r\n\r\n",message);
+	Vector v = ssplit("\r\n\r\n",message);
 	if(vector_length(v)!=2){
 		printf("Unexpected vector length of  %lu\n",vector_length(v));
 		//exit(0);
@@ -160,6 +159,9 @@ uint16_t check_valid_params(Map m){
 
 uint8_t get_request_type(Map m){
 	char* status_line = (char*)map_value_at(m,"REQUEST");
+	if(!status_line){
+		status_line = (char*)map_value_at((Map)map_value_at(m,"HEADER"),"REQUEST");
+	}
 	if(strpos(status_line,"GET")==0){
 		return GET;
 	}

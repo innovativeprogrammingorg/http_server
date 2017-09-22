@@ -9,6 +9,7 @@ char * last_input = NULL;
 void segfault_catch(int signum){
 	puts("Server encountered a segmentation fault");
 	printf("The last received is : \n%s \n",last_input);
+	/*printf("Showing the breaks... \n %s\n ",str_replace("\n","<cl>",str_replace("\r\n","<clrf>",last_input)));*/
 	exit(EXIT_FAILURE);
 }
 
@@ -30,6 +31,7 @@ int main(){
 	int cons = 0;
 	char * out;
 	Map headers = NULL;
+	Client c;
 	signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
 	if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) {
@@ -70,7 +72,7 @@ int main(){
 		printf("The number of connections is %i\n",cons);
 		
 		for (i = 0 ; i < cons ; i++) {
-			sd = *((int *)vector_get(clients,i));
+			sd = ((Client)vector_get(clients,i))->fd;
 			if(sd > 0)
 				FD_SET(sd,&readfds);
 			 
@@ -87,13 +89,13 @@ int main(){
 				perror("accept");
 				exit(EXIT_FAILURE);
 			}
-			vector_push(&clients,intmemcopy(&new_socket));	
+			vector_push(&clients,new_client(new_socket,inet_ntoa(address.sin_addr),ntohs(address.sin_port)));	
 			cons++;
 			continue;
 		}
 		for (i = 0; i < cons; i++){
 			/*printf("Checking on user %i\n",i);*/
-			sd = *((int *)vector_get(clients,i));
+			sd = ((Client)vector_get(clients,i))->fd;
 			/*printf("Retrieved the socket of that user\n");*/
 			if (FD_ISSET( sd , &readfds)){
 				/*printf("Checking to see what action occured...\n");*/
@@ -106,13 +108,14 @@ int main(){
 					i = 0;
 				}else{
 					for (j = 0; j < cons; j++){
-						sd = *((int *)vector_get(clients,j));
+						c = (Client)vector_get(clients,i);
+						sd = c->fd;
 						/*printf("The socket number for this message is %i\n",sd);*/
 						buffer[valread] = '\0';
 						last_input = buffer;
 						respond(sd,build_response(parse_HTTP_message(buffer)));
 						//print_map_contents(headers, 's');
-						//write(0, buffer, strlen(buffer));
+						write(0, buffer, strlen(buffer));
 					}
 					
 				}

@@ -53,14 +53,23 @@ char* GET_response(Map header){
 	head = concat(head,get_server_line(),FIRST);
 	
 	//head = concat(head,get_vary_line(),FIRST);
-	return concat(head,concat("\r\n",body,FALSE),FIRST|SECOND);
+	return concat(head,concat("\r\n",body,SECOND),FIRST|SECOND);
 }
 
 char* POST_response(Map message){
 	char* directory = get_requested_directory((Map)map_value_at(message,"HEADER"));
 	directory = concat("./www",directory,SECOND);
-	
-	return NULL;
+	char* body = process_through_PHP(map_value_at(message,"BODY"),directory);
+	if(body == NULL){
+		return NULL;
+	}
+	size_t content_length = strlen(body);
+	char* head = get_status_line(200);
+	head = concat(head,get_date_line(),SECOND);
+	head = concat(head,get_content_length_line(content_length),FIRST|SECOND);
+	head = concat(head,get_connection_line(map_value_at(message,"HEADER")),FIRST);
+	head = concat(head,get_server_line(),FIRST);
+	return concat(head,concat("\r\n",body,SECOND),FIRST|SECOND);
 }
 
 char* get_requested_directory(Map m){

@@ -2,7 +2,7 @@
 
 char* parse_PHP_args(Map args){
 	char** keys = map_get_keys(args);
-	char* out;
+	char* out = NULL;
 	uint64_t i = 0;
 	while(keys[i]){
 		out = concat(out,concat(concat(keys[i],concat("=",map_value_at(args,keys[i]),FALSE),FIRST|SECOND)," ",FIRST),(out)? FIRST | SECOND : SECOND);

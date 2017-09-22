@@ -28,6 +28,14 @@ Vector split(char quan,char * subject){
 	return out;
 }
 
+Vector ssplit(char* quan,char * subject){
+	Vector out = NULL;
+	int index = strpos(subject,quan);
+	vector_push(&out,substring(subject,0,index));
+	vector_push(&out,substr(subject,index+strlen(quan)));
+	return out;
+}
+
 char * substring_f(char * subject,size_t index,size_t length){
 	char * out = substring(subject,index,length);
 	free(subject);
@@ -145,10 +153,9 @@ char * substr(char * subject,int index){
 }
 
 uint_least8_t strcompare(char * str1, char * str2){
-	register uint_fast64_t l1 = strlength(str1);
-	register uint_fast64_t l2 = strlength(str2);
+	register uint_fast64_t l1 = strlen(str1);
 	register uint_fast64_t i;
-	if(l1 != l2){
+	if(l1 != strlen(str2)){
 		return FALSE;
 	}
 	for(i = 0;i<l1;i++){
@@ -202,7 +209,7 @@ char * concat(char * s1, char * s2, uint8_t mem){
 	return out;
 }
 
-int strpos(char * haystack, char * needle){
+int64_t strpos(char * haystack, char * needle){
 	size_t length = strlen(haystack);
 	size_t nlength = strlen(needle);
 	register uint_fast64_t i;
@@ -247,7 +254,15 @@ char * trim(char* str){
 
 
 char* str_replace(char* search,char* replace,char* subject){
-	/**
-	 * TODO
-	 */
+	int64_t start = strpos(subject,search);
+	if(start == -1){
+		return subject;
+	}
+	char* first_chunk = substring(subject,0,start);
+	
+	if(start+strlen(search)<strlen(subject)){
+		return str_replace(search,replace,concat(first_chunk,concat(replace,substr(subject,start+strlen(search)),SECOND),FIRST|SECOND));
+	}
+	return str_replace(search,replace,concat(first_chunk,replace,FIRST));
+
 }

@@ -27,6 +27,7 @@
 #include <openssl/x509_vfy.h>
 #include <resolv.h>
 #include "base64.h"
+#include "client.h"
 
 #ifndef TRUE
 #define TRUE   1

@@ -96,8 +96,13 @@ void* map_value_at(Map m, char* key){
 		return NULL;
 	}
 	tmp = m->head;
-	while(!strcompare(key,tmp->key) && tmp != NULL){
+	while(tmp != NULL && !strcompare(key,tmp->key)){
 		tmp = tmp->next;
+	}
+	if(tmp == NULL){
+		puts("Error, key not found!");
+		print_map_contents(m);
+		return NULL;
 	}
 	return tmp->value;
 }
