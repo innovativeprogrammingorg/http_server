@@ -7,8 +7,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
+#include "io.h"
+#include "map.h"
 
-char* process_through_php(Map _POST,char* dir);
+char* process_through_PHP(Map _POST,char* dir);
+char* parse_PHP_args(Map args);
 
 
 #endif

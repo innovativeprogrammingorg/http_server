@@ -18,7 +18,12 @@ Map parse_HTTP_message(char * message){
 		return parse_HTTP_header(message);
 	}	
 	Map out = NULL;
+
 	Vector v = explode("\r\n\r\n",message);
+	if(vector_length(v)!=2){
+		printf("Unexpected vector length of  %lu\n",vector_length(v));
+		//exit(0);
+	}
 	Map header = parse_HTTP_header(vector_get(v,0));
 	
 	

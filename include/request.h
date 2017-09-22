@@ -6,6 +6,7 @@
 #include "vector.h"
 #include "io.h"
 #include "header.h"
+#include "POST.h"
 
 char* e404_response(Map header);
 char* GET_response(Map header);

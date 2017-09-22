@@ -244,3 +244,10 @@ char * trim(char* str){
 	free(str);
 	return out;
 }
+
+
+char* str_replace(char* search,char* replace,char* subject){
+	/**
+	 * TODO
+	 */
+}
