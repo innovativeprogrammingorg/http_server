@@ -185,7 +185,7 @@ uint8_t get_request_type(Map m){
 	return UNKNOWN;
 }
 
-char* build_response(Map m){
+Response build_response(Map m){
 	if(1 != check_valid_params(m)){
 		//handle the error here
 	}

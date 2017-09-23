@@ -4,7 +4,7 @@
 #include "str.h"
 #include "vector.h"
 #include "map.h"
-#include "request.h"
+#include "response.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -26,7 +26,7 @@ char * get_server_line();
 char* get_content_length_line(uint64_t content_length);
 char* get_connection_line(Map header);
 char* get_content_type_line(char* content);
-char* build_response(Map m);
+Response build_response(Map m);
 char* get_vary_line();
 char* get_content_encoding_line(char * encode);
 char* get_accept_ranges_line();

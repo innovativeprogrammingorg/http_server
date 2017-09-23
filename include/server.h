@@ -16,7 +16,7 @@
 #include "vector.h"
 #include "map.h"
 #include "header.h"
-#include "request.h"
+#include "response.h"
 #include <signal.h>
 #include "io.h"
 /*#include <openssl/bio.h>
@@ -39,7 +39,6 @@
 
 #define BUFFER_SIZE 200000 
 
-int expo(int n,int i);
 void segfault_catch(int signum);
 void kill_all(int signum);
 Vector get_current_clients();

@@ -116,7 +116,7 @@ char * substring(char * subject,size_t index,int length){
 	}
 	char * out = (char *)malloc(sizeof(char)*(length + 1));
 	register uint_fast64_t i;
-	for(i = 0;i<length && subject[i+index]!='\0';i++){
+	for(i = 0;i<length;i++){
 		out[i] = subject[i+index];
 	}
 	out[i] = '\0';

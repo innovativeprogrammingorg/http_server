@@ -10,8 +10,8 @@
 #include <sys/stat.h>
 #include "str.h"
 #include "base64.h"
-#include "vector.h"
 
+#include "response.h"
 /**
  * Read from file descriptor
  * @param  fd   The file descriptor to be read from
@@ -23,6 +23,8 @@ uint64_t sread_file(char* directory,char** data);
 uint64_t prepare_media(char* directory,char** data);
 uint64_t read_file(int fd,char** data);
 char * get_content_type(char* directory);
-void respond(int fd, char * data);
+void srespond(int fd, char * data);
+void respond(int fd, Response r);
+void force_print(char* in,size_t length);
 
 #endif

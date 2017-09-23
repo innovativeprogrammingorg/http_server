@@ -1,5 +1,25 @@
 #include "io.h"
 
+char* force_concat(char* s1,size_t l1,char*s2,size_t l2,uint8_t mem){
+	size_t length = l1 + l2;
+	char * out = (char *)calloc(sizeof(char),(length+1));
+	register uint_fast64_t i;
+	for(i = 0;i<l1;i++){
+		out[i] = s1[i];
+	}
+	for(i = 0;i<l2;i++){
+		out[i+l1] = s2[i];
+	}
+	if((mem >> 1)& 1){
+		free(s2);
+	}
+	if((mem & 1)){
+		free(s1);
+	}
+	out[length] = '\0';
+	return out;
+}
+
 char * get_content_type(char* directory){
 	char* command = concat("/usr/bin/file -i ",directory,FALSE);
 	FILE* fd = popen(command,"r");
@@ -57,7 +77,6 @@ uint64_t sread_file(char* directory,char** data){
 	fclose(fd);
 	return out;
 }
-
 uint64_t prepare_media(char* directory,char** data){
 	//char* src = concat("./tmp",concat(directory,".gz",FALSE),SECOND);
 	/*if(access(src,F_OK)==-1){
@@ -65,17 +84,31 @@ uint64_t prepare_media(char* directory,char** data){
 	}*/
 	char* src = concat("./www",directory,FALSE);
 	FILE* fd =  fopen(src,"r");
-	char * raw_data;
+	char* raw_data;
 	size_t n;
-	if(!(n = fread_file(fd,&raw_data))){
-		perror("Error reading file");
-		exit(EXIT_FAILURE);
+
+	char* buffer = (char*)calloc(sizeof(char),200);
+	char* dat = NULL;
+	uint64_t out = 0;
+	while(!feof(fd)){
+		n = fread(buffer,sizeof(char),199,fd);
+		if(dat != NULL){
+			dat = force_concat(dat,out,buffer,n,FIRST);
+		}else{
+			dat = force_concat(NULL,0,buffer,n,FALSE);
+		}
+		out += n;
+		memset(buffer,'\0',200);
 	}
-	char * out = convertToBase64(raw_data);
-	free(raw_data);
-	*data = out;
+	*data = dat;
+	fclose(fd);
+	
+	//char * out = convertToBase64(raw_data);
+	//free(raw_data);s
 	//printf("RAW: %s\n",out);
-	return strlen(out);
+	/*printf("Read %lu bytes from the file\n",out);
+	force_print(raw_data,out);*/
+	return out;
 }
 
 uint64_t fread_file(FILE* fd,char** data){
@@ -117,7 +150,7 @@ uint64_t read_file(int fd,char** data){
 	return out;
 }
 
-void respond(int fd, char * data){
+void srespond(int fd, char* data){
 	//printf("HTTP MESSAGE\n%s\n\n\n",data);
 	int chunk_size = 1000;
 	int64_t size = strlen(data); 
@@ -140,4 +173,39 @@ void respond(int fd, char * data){
 		chunk++;
 	}
 	puts("done");
+}
+void force_print(char* in,size_t length){
+	uint64_t i;
+	for(i = 0;i<length;i++){
+		printf("%c",in[i]);
+	}
+	printf("\n");
+}
+void respond(int fd, Response r){
+	
+	int chunk_size = 1000;
+	int64_t size = r->data_size;
+	int chunks = size/chunk_size;
+	int chunk = 0;
+	char* buffer;
+	srespond(fd,concat(r->header,"\r\n",FALSE));
+	printf("Sending %ld bytes of data to the client...",size);
+	while(size>0){
+		if(size>=chunk_size){
+			buffer = substring(r->body,chunk*chunk_size,size);
+			write(fd,buffer,chunk_size);
+			free(buffer);
+		}else{
+			
+			buffer = substring(r->body,chunk*chunk_size,chunk_size);
+			write(fd,buffer,size);
+			free(buffer);
+		}
+		size = size - chunk_size;
+		chunk++;
+	}
+	puts("done");
+	/*puts("DATA sent is ______________________________");
+	force_print(r->body,r->data_size);
+	puts("_____________________________");*/
 }
