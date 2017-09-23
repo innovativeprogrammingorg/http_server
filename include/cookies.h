@@ -7,9 +7,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
+#include <stdint.h>
 #include <time.h>
 #include "io.h"
 #include "map.h"
+#include "server.h"
 
 typedef struct cookie * Cookie;
 
@@ -20,10 +22,9 @@ struct cookie{
 };
 
 Cookie new_cookie(char* value,time_t created,time_t exp);
-uint8_t store_cookie(char* ip, char* key, char* value);
+uint8_t store_cookie(char* ip, char* key, Cookie c);
 Map load_cookies(char* ip);
 uint8_t parse_cookies(char* ip,Map header);
-char* get_cookie(char* ip, char* key);
 
 
 #ifndef COOKIES_DIR

@@ -17,6 +17,24 @@ char* e404_response(Map header){
 	return concat(head,concat("\r\n",body,SECOND),FIRST|SECOND);
 }
 
+char* e400_response(Map header){
+	char* directory = "/400.shtml";
+	char* body;
+	FILE* fd;
+	char* head;
+	uint64_t content_length;
+	content_length = sread_file(directory,&body);
+	head = get_status_line(404);
+	head = concat(head,get_date_line(),SECOND);
+	head = concat(head,get_server_line(),FIRST);
+	head = concat(head,get_content_length_line(content_length),FIRST|SECOND);
+	head = concat(head,get_connection_line(header),FIRST);
+	head = concat(head,get_content_type_line("text/html"),FIRST);
+	head = concat(head,get_vary_line(),FIRST);
+	//head = concat(head,get_content_encoding_line(),FIRST);
+	return concat(head,concat("\r\n",body,SECOND),FIRST|SECOND);
+}
+
 char* GET_response(Map header){
 	char* directory = get_requested_directory(header);
 	char* body;

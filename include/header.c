@@ -28,7 +28,6 @@ Map parse_HTTP_message(char * message){
 	
 	map_add(&out,"HEADER",header,MAP_TYPE);
 	map_add(&out,"BODY",parse_HTTP_body(vector_get(v,1)),MAP_TYPE);
-	
 	return out;
 }
 Map parse_HTTP_header(char * header){

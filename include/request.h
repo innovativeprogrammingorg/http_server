@@ -9,8 +9,10 @@
 #include "POST.h"
 
 char* e404_response(Map header);
+char* e400_response(Map header);
 char* GET_response(Map header);
 char* get_requested_directory(Map m);
 char* POST_response(Map header);
+
 
 #endif

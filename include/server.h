@@ -19,12 +19,12 @@
 #include "request.h"
 #include <signal.h>
 #include "io.h"
-#include <openssl/bio.h>
+/*#include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
 #include <openssl/x509.h>
-#include <openssl/x509_vfy.h>
+#include <openssl/x509_vfy.h>*/
 #include <resolv.h>
 #include "base64.h"
 #include "client.h"
@@ -37,9 +37,11 @@
 #define FALSE  0
 #endif
 
-#define BUFFER_SIZE 20000 
+#define BUFFER_SIZE 200000 
 
 int expo(int n,int i);
 void segfault_catch(int signum);
+void kill_all(int signum);
+Vector get_current_clients();
 
 #endif

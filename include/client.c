@@ -6,5 +6,19 @@ Client new_client(int fd,char* ip,int port){
 	out->fd = fd;
 	out->ip = ip;
 	out->port = port;
+	out->cookies = NULL;
 	return out;
+}
+
+Client find_client_by_ip(Vector clients,char* ip){
+	size_t length = vector_length(clients);
+	Client c = NULL;
+	uint_fast64_t i;
+	for(i = 0;i<length;i++){
+		c = (Client)vector_get(clients,i);
+		if(strcompare(ip,c->ip)){
+			return c;
+		}
+	}
+	return NULL;
 }

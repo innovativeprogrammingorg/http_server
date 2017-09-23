@@ -28,6 +28,8 @@ struct map{
 
 uint8_t map_has_key(Map m, char* key);
 void map_add(Map* m, char* key, void* value,uint8_t type);
+void map_update(Map *m, char* key, void* value, uint8_t type);
+
 void map_remove(Map* m, char* key);
 void* map_value_at(Map m, char* key);
 char** map_get_keys(Map m);
@@ -61,6 +63,10 @@ void print_map_contents(Map m);
 
 #ifndef INTEGER_TYPE
 #define INTEGER_TYPE 4
+#endif
+
+#ifndef COOKIE_TYPE
+#define COOKIE_TYPE 5
 #endif
 
 #endif

@@ -107,6 +107,25 @@ void* map_value_at(Map m, char* key){
 	return tmp->value;
 }
 
+void map_update(Map *m, char* key, void* value, uint8_t type){
+	Meta tmp;
+	if(m == NULL){
+		puts("Error map is null");
+		return;
+	}
+	tmp = (*m)->head;
+	while(tmp != NULL && !strcompare(key,tmp->key)){
+		tmp = tmp->next;
+	}
+	if(tmp == NULL){
+		/*puts("Error, key not found!");
+		print_map_contents(m);*/
+		return;
+	}
+	tmp->value = value;
+	tmp->type = type;
+}
+
 size_t map_size(Map m){
 	Meta tmp = m->head;
 	size_t size = 0;

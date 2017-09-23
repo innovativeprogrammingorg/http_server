@@ -1,21 +1,15 @@
 #include "./include/server.h"
-int * intmemcopy(int * ptr){
-	int* out = (int *)malloc(sizeof(int));
-	*out = *ptr;
-	return out;
-}
+
+Vector clients = NULL;
 char * last_input = NULL;
+Client active_client = NULL;
 
-void segfault_catch(int signum){
-	puts("Server encountered a segmentation fault");
-	printf("The last received is : \n%s \n",last_input);
-	/*printf("Showing the breaks... \n %s\n ",str_replace("\n","<cl>",str_replace("\r\n","<clrf>",last_input)));*/
-	exit(EXIT_FAILURE);
+Vector get_current_clients(){
+	return clients;
 }
 
-void kill_all(int signum){
-	puts("Killed");
-	exit(EXIT_SUCCESS);
+Client get_active_client(){
+	return active_client;
 }
 
 int main(){
@@ -24,14 +18,12 @@ int main(){
 	int max_sd;
 	int port = 8989;
 	int j;
-	Vector clients = NULL;
 	struct sockaddr_in address;
 	char buffer[BUFFER_SIZE];  
 	fd_set readfds;
 	int cons = 0;
 	char * out;
-	Map headers = NULL;
-	Client c;
+
 	signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
 	if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) {
@@ -99,7 +91,7 @@ int main(){
 			/*printf("Retrieved the socket of that user\n");*/
 			if (FD_ISSET( sd , &readfds)){
 				/*printf("Checking to see what action occured...\n");*/
-				if ((valread = read( sd , buffer, 2048)) == 0){
+				if ((valread = read( sd , buffer, BUFFER_SIZE - 1)) == 0){
 					/*printf("Removing the User from the list\n");*/
 					vector_pop(&clients,i);
 					/*printf("Removed Successfully!\n");*/
@@ -108,20 +100,35 @@ int main(){
 					i = 0;
 				}else{
 					for (j = 0; j < cons; j++){
-						c = (Client)vector_get(clients,i);
-						sd = c->fd;
+						active_client = (Client)vector_get(clients,i);
+						sd = active_client->fd;
 						/*printf("The socket number for this message is %i\n",sd);*/
 						buffer[valread] = '\0';
 						last_input = buffer;
 						respond(sd,build_response(parse_HTTP_message(buffer)));
-						//print_map_contents(headers, 's');
-						write(0, buffer, strlen(buffer));
+						//print_map_contents(headers);
+						//write(0, buffer, strlen(buffer));
 					}
 					
 				}
 			}
 		}
-		memset(&buffer,0,2048);
+		memset(&buffer,0,BUFFER_SIZE);
 	}
 	return EXIT_SUCCESS;
 } 
+
+
+
+
+void segfault_catch(int signum){
+	puts("Server encountered a segmentation fault");
+	printf("The last received is : \n%s \n",last_input);
+	/*printf("Showing the breaks... \n %s\n ",str_replace("\n","<cl>",str_replace("\r\n","<clrf>",last_input)));*/
+	exit(EXIT_FAILURE);
+}
+
+void kill_all(int signum){
+	puts("Killed");
+	exit(EXIT_SUCCESS);
+}

@@ -12,6 +12,12 @@
 #include "base64.h"
 #include "vector.h"
 
+/**
+ * Read from file descriptor
+ * @param  fd   The file descriptor to be read from
+ * @param  data The destination for the data
+ * @return      TRUE/FALSE (Failure/Success)
+ */
 uint64_t fread_file(FILE * fd,char** data);
 uint64_t sread_file(char* directory,char** data);
 uint64_t prepare_media(char* directory,char** data);

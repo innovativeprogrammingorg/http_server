@@ -48,7 +48,12 @@ char * substr_f(char * subject,size_t index){
 	return out;
 }
 
-char * itoa(uint32_t num){
+char* itoa(uint32_t num){
+	char * characters[10] = {"0","1","2","3","4","5","6","7","8","9"};
+	return (num>=10)? concat(itoa(num/10),characters[num%10],FALSE) : characters[num];
+}
+
+char* ltoa(uint64_t num){
 	char * characters[10] = {"0","1","2","3","4","5","6","7","8","9"};
 	return (num>=10)? concat(itoa(num/10),characters[num%10],FALSE) : characters[num];
 }
@@ -208,6 +213,23 @@ char * concat(char * s1, char * s2, uint8_t mem){
 	out[length] = '\0';
 	return out;
 }
+
+char* concat_all(int args,...){
+	va_list valist;
+	int i = 0;
+	char* output = NULL;
+	va_start(valist, args);
+	for(i = 0;i<args;i++){
+		if(i = 0){
+			output = concat(output,(char*)va_arg(valist, char*),FALSE);
+		}else{
+			output = concat(output,(char*)va_arg(valist, char*),FIRST);
+		}
+	}
+	va_end(valist);
+	return output;
+}
+
 
 int64_t strpos(char * haystack, char * needle){
 	size_t length = strlen(haystack);
