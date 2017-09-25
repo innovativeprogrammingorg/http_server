@@ -4,12 +4,13 @@ void start_PHP_script(char* script,int port){
 	if(!fork()){
 		char* args[5] = {"-f",script,"-b",concat("127.0.0.1:",itoa(port),FALSE),NULL};
 		execv("/usr/bin/php",args);
+		exit(EXIT_SUCCESS);
 	}
 }
 
 uint64_t* run_CGI(char* message,char* script,char ** data){
 	int opt = TRUE;
-	int master_socket , addrlen , new_socket, i , valread , sd;
+	int master_socket , addrlen , new_socket, valread;
 	int max_sd;
 	int port = 8988;
 	struct sockaddr_in address;
@@ -18,6 +19,7 @@ uint64_t* run_CGI(char* message,char* script,char ** data){
 	char * out = NULL;
 	Client c = NULL;
 	uint64_t* size = (uint64_t*)malloc(sizeof(uint64_t));
+
 	if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) {
 		perror("socket failed");
 		exit(EXIT_FAILURE);
@@ -66,7 +68,7 @@ uint64_t* run_CGI(char* message,char* script,char ** data){
 			printf("select error");
 		}
 		if (FD_ISSET(master_socket, &readfds)){
-			if ((new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0){
+			if ((new_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen))<=0){
 				perror("accept");
 				exit(EXIT_FAILURE);
 			}

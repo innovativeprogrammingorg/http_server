@@ -16,4 +16,9 @@ Client new_client(int fd,char* ip,int port);
 Client find_client_by_ip(Vector clients,char* ip);
 
 
+#ifndef CLIENT_TIMEOUT
+#define CLIENT_TIMEOUT 600
+#endif
+
+
 #endif

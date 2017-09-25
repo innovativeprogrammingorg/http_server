@@ -1,6 +1,8 @@
 #ifndef _DATA_TYPES_H_
 #define _DATA_TYPES_H_
 #include "map.h"
+#include <stdint.h>
+#include <time.h>
 #include <pthread.h>
 
 
@@ -11,6 +13,7 @@ struct client{
 	int port;
 	int fd;
 	Map cookies;
+	time_t last_active;
 };
 
 

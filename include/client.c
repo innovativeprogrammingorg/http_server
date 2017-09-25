@@ -7,6 +7,7 @@ Client new_client(int fd,char* ip,int port){
 	out->ip = ip;
 	out->port = port;
 	out->cookies = NULL;
+	out->last_active = time(NULL);
 	return out;
 }
 

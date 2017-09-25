@@ -17,6 +17,7 @@ Vector explode(char * quan,char * subject){
 			slength = strlen(subj);
 		}
 	}
+	free(subj);
 	return out;
 }
 
@@ -57,8 +58,6 @@ char* ltoa(uint64_t num){
 	char * characters[10] = {"0","1","2","3","4","5","6","7","8","9"};
 	return (num>=10)? concat(itoa(num/10),characters[num%10],FALSE) : characters[num];
 }
-
-
 
 char* str_reverse(char* str){
 	size_t length = strlen(str);
@@ -116,16 +115,17 @@ char * substring(char * subject,size_t index,int length){
 	}
 	char * out = (char *)malloc(sizeof(char)*(length + 1));
 	register uint_fast64_t i;
+
 	for(i = 0;i<length;i++){
 		out[i] = subject[i+index];
 	}
-	out[i] = '\0';
+	out[length] = '\0';
 	return out;
 }
 
 
-char * substr_r(char * subject,int index){
-	register uint_fast64_t length = strlen(subject);
+char* substr_r(char * subject,int index){
+	uint64_t length = strlen(subject);
 	char * out;
 	register uint_fast64_t i = 0;
 	register uint_fast64_t start = length + index;
@@ -138,11 +138,12 @@ char * substr_r(char * subject,int index){
 	out[i] = '\0';
 	return out;
 }
-char * substr(char * subject,int index){
+
+char* substr(char * subject,int index){
 	if(index<0){
 		return substr_r(subject,index);
 	}
-	register uint_fast64_t length = strlength(subject);
+	uint64_t length = strlength(subject);
 	char * out;
 	register uint_fast64_t i = 0;
 	if(length<index+1){
@@ -158,7 +159,7 @@ char * substr(char * subject,int index){
 }
 
 uint_least8_t strcompare(char * str1, char * str2){
-	register uint_fast64_t l1 = strlen(str1);
+	register uint64_t l1 = strlen(str1);
 	register uint_fast64_t i;
 	if(l1 != strlen(str2)){
 		return FALSE;
@@ -172,9 +173,8 @@ uint_least8_t strcompare(char * str1, char * str2){
 }
 
 uint_least8_t strcompsub(char * str1,char * str2, size_t index, size_t length){
-	register uint_fast64_t l1 = strlen(str1);
 	register uint_fast64_t i;
-	if(l1 != length){
+	if(length != strlen(str1)){
 		return FALSE;
 	}
 	for(i = index;i<length+index;i++){
@@ -192,7 +192,7 @@ size_t strlength(char * str){
 	return strlen(str);
 }
 
-char * concat(char * s1, char * s2, uint8_t mem){
+char* concat(char * s1, char * s2, uint8_t mem){
 	register uint_fast64_t l1 = strlength(s1);
 	register uint_fast64_t l2 = strlength(s2);
 	size_t length = l1 + l2;
@@ -220,7 +220,7 @@ char* concat_all(int args,...){
 	char* output = NULL;
 	va_start(valist, args);
 	for(i = 0;i<args;i++){
-		if(i = 0){
+		if(i == 0){
 			output = concat(output,(char*)va_arg(valist, char*),FALSE);
 		}else{
 			output = concat(output,(char*)va_arg(valist, char*),FIRST);
@@ -257,8 +257,8 @@ int indexOfChar(char * haystack, char needle){
 }
 
 char * trim(char* str){
-	register uint_fast32_t start = 0;
-	register uint_fast32_t end = strlen(str);
+	register uint_fast64_t start = 0;
+	register uint_fast64_t end = strlen(str);
 	while(str[start] == '\n' || str[start]== '\r' || str[start]==' '){
 		start++;
 	}

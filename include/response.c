@@ -11,7 +11,6 @@ Response new_response(char* header, char* body,size_t data_size){
 Response e404_response(Map header){
 	char* directory = "/404.shtml";
 	char* body;
-	FILE* fd;
 	char* head;
 	uint64_t content_length;
 	content_length = sread_file(directory,&body);
@@ -29,7 +28,6 @@ Response e404_response(Map header){
 Response e400_response(Map header){
 	char* directory = "/400.shtml";
 	char* body;
-	FILE* fd;
 	char* head;
 	uint64_t content_length;
 	content_length = sread_file(directory,&body);
@@ -47,7 +45,6 @@ Response e400_response(Map header){
 Response GET_response(Map header){
 	char* directory = get_requested_directory(header);
 	char* body;
-	int fd;
 	char* head;
 	uint64_t content_length;
 	char* src = concat("./www",directory,FALSE);

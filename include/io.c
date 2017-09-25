@@ -84,9 +84,7 @@ uint64_t prepare_media(char* directory,char** data){
 	}*/
 	char* src = concat("./www",directory,FALSE);
 	FILE* fd =  fopen(src,"r");
-	char* raw_data;
 	size_t n;
-
 	char* buffer = (char*)calloc(sizeof(char),200);
 	char* dat = NULL;
 	uint64_t out = 0;
@@ -102,12 +100,7 @@ uint64_t prepare_media(char* directory,char** data){
 	}
 	*data = dat;
 	fclose(fd);
-	
-	//char * out = convertToBase64(raw_data);
-	//free(raw_data);s
-	//printf("RAW: %s\n",out);
-	/*printf("Read %lu bytes from the file\n",out);
-	force_print(raw_data,out);*/
+
 	return out;
 }
 
@@ -154,7 +147,6 @@ void srespond(int fd, char* data){
 	//printf("HTTP MESSAGE\n%s\n\n\n",data);
 	int chunk_size = 1000;
 	int64_t size = strlen(data); 
-	int chunks = size/chunk_size;
 	int chunk = 0;
 	char* buffer;
 	printf("Sending %ld bytes of data to the client...",size);
@@ -185,7 +177,6 @@ void respond(int fd, Response r){
 	
 	int chunk_size = 1000;
 	int64_t size = r->data_size;
-	int chunks = size/chunk_size;
 	int chunk = 0;
 	char* buffer;
 	srespond(fd,concat(r->header,"\r\n",FALSE));

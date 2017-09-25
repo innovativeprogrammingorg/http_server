@@ -4,13 +4,6 @@ Vector clients = NULL;
 char * last_input = NULL;
 Client active_client = NULL;
 
-Vector get_current_clients(){
-	return clients;
-}
-
-Client get_active_client(){
-	return active_client;
-}
 
 int main(){
 	int opt = TRUE;
@@ -21,6 +14,7 @@ int main(){
 	char buffer[BUFFER_SIZE];  
 	fd_set readfds;
 	int cons = 0;
+	Client c;
 
 	signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
@@ -58,7 +52,6 @@ int main(){
 		max_sd = master_socket;
 		 
 		printf("The number of connections is %i\n",cons);
-		
 		for (i = 0 ; i < cons ; i++) {
 			sd = ((Client)vector_get(clients,i))->fd;
 			if(sd > 0)
@@ -97,14 +90,21 @@ int main(){
 				}else{
 					
 					active_client = (Client)vector_get(clients,i);
+					active_client->last_active = time(NULL);
 					/*printf("The socket number for this message is %i\n",sd);*/
 					buffer[valread] = '\0';
 					last_input = buffer;
 					create_new_thread(active_client,buffer);
 					//print_map_contents(headers);
 					//write(0, buffer, strlen(buffer));
-					
-					
+				}
+			}else{
+				c = (Client)vector_get(clients,i);
+				if(time(NULL) - c->last_active > CLIENT_TIMEOUT){
+					vector_pop(&clients,i);
+					cons--;
+					close(sd);
+					i = 0;
 				}
 			}
 		}
@@ -115,6 +115,13 @@ int main(){
 
 
 
+Vector get_current_clients(){
+	return clients;
+}
+
+Client get_active_client(){
+	return active_client;
+}
 
 void segfault_catch(int signum){
 	puts("Server encountered a segmentation fault");
@@ -124,6 +131,7 @@ void segfault_catch(int signum){
 }
 
 void kill_all(int signum){
-	puts("Killed");
+	vector_clean(clients);
+	puts("Killed\n");
 	exit(EXIT_SUCCESS);
 }

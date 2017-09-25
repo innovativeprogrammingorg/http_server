@@ -11,66 +11,65 @@ Map parse_HTTP_body(char * body){
 		map_add(&out,vector_get(pair,0),vector_get(pair,1),STRING_TYPE);
 		vector_clean(pair);
 	}
+	vector_clean(data);
 	return out;
 }
 
 Map parse_HTTP_message(char * message){
-	char * directory;
+	/*char * directory;
+	char *  data;*/
 	Map out = NULL;
-	char *  data;
-	if(is_PHP_request(message,&directory)){
+	Vector v;
+	/*if(is_PHP_request(message,&directory)){
 		map_add(&out,"SIZE",run_CGI(message,directory,&data),ULONGINT_TYPE);
 		map_add(&out,"PHP_CGI",data,STRING_TYPE);
 		return out;
-	}
+	}*/
 	if(strpos(message,"GET")==0){
 		return parse_HTTP_header(message);
-	}	
-	
-	Vector v = ssplit("\r\n\r\n",message);
+	}
+	v = ssplit("\r\n\r\n",message);
 	if(vector_length(v)!=2){
 		printf("Unexpected vector length of  %lu\n",vector_length(v));
 		//exit(0);
 	}
-	Map header = parse_HTTP_header(vector_get(v,0));
-	
-	
-	map_add(&out,"HEADER",header,MAP_TYPE);
-	map_add(&out,"BODY",parse_HTTP_body(vector_get(v,1)),MAP_TYPE);
+	map_add(&out,"HEADER",parse_HTTP_header((char*)vector_get(v,0)),MAP_TYPE);
+	map_add(&out,"BODY",parse_HTTP_body((char*)vector_get(v,1)),MAP_TYPE);
+	vector_clean(v);
+	free(message);
 	return out;
 }
-Map parse_HTTP_header(char * header){
+Map parse_HTTP_header(char* header){
 	/*puts("Parsing the HTTP header");*/
 	//printf("\n\n\n\n%s\n\n\n\n",header);
 	Vector parameters = explode("\r\n",header);
 	size_t length = vector_length(parameters);
-	int i = 0;
+	uint32_t i = 0;
 	Map out = NULL;
 	char* key;
 	void* value;
 	void* tmp;
+	Vector arr = NULL;
 	Vector key_value_pair = NULL;
-	Vector values = NULL;
 	//puts("Parsing the parameters...");
 	for(i = 0;i<length;i++){
 		//printf("Parsing parameter %d/%lu\n",i,length);
 		if(i == 0){
-			key = "REQUEST";
 			tmp = (char*)vector_get(parameters,i);
-			value = malloc(sizeof(char*)*(strlen(tmp)));
-			strcpy((char*)value,tmp);
-			map_add(&out,key,value,STRING_TYPE);
+			value = (char*)calloc(sizeof(char*),strlen(tmp)+1);
+			strcpy(value,tmp);
+			map_add(&out,"REQUEST",value,STRING_TYPE);
+			continue;
 		}else{
 			key_value_pair = split(':',vector_get(parameters,i));
 			key = trim((char*)vector_get(key_value_pair,0));
-			value = (char*)malloc(sizeof(char*)*(strlen((char*)vector_get(key_value_pair,1)) + 1));
-		
-			strcpy(value,(char*)vector_get(key_value_pair,1));
+			tmp = (char*)vector_get(key_value_pair,1);
+			value = (char*)calloc(sizeof(char*),strlen(tmp) + 1);
+			strcpy(value,tmp);
 			value = trim(value);
 			//printf("Value is %s\n",(char*)value);
 			if(strpos(key,"User-Agent")!=-1){
 				map_add(&out,key,value,STRING_TYPE);
-				//printf("Added %s:%s\n",key,(char*)value);
 			}else if(indexOfChar((char*)value,';')!=-1){
 				/*puts("Value is an array delim = ;");
 				printf("Key is %s\n",key);*/
@@ -79,14 +78,19 @@ Map parse_HTTP_header(char * header){
 			}else if(indexOfChar((char*)value,',')!=-1){
 				/*puts("Value is an array delim = ,");
 				printf("Key is %s\n",key);*/
-				value =  vector_to_array(explode(",",(char*)value));
+				arr = explode(",",(char*)value);
+				value = vector_to_array(arr);
+				vector_clean(arr);
 				map_add(&out,key,value,ARRAY_TYPE);
 			}else{
 				map_add(&out,key,value,STRING_TYPE);
 				//printf("Added %s:%s\n",key,(char*)value);
 			}
+			free(key);
+			vector_clean(key_value_pair);
 		}
 	}
+	vector_clean(parameters);
 	return out;
 }
 
@@ -108,6 +112,7 @@ char * get_status_line(int status){
 		case 503:
 			return "HTTP/1.1 503 Service Unavailable\r\n";
 	}
+	return NULL;
 }
 
 char * get_date_line(){
@@ -195,22 +200,24 @@ uint8_t get_request_type(Map m){
 }
 
 Response build_response(Map m){
-	if(map_has_key(m,"PHP_CGI")){
+	Response out = NULL;
+	uint8_t request;
+	/*if(map_has_key(m,"PHP_CGI")){
 		return CGI_response(m);
-	}
+	}*/
 	if(1 != check_valid_params(m)){
 		//handle the error here
 	}
-	uint8_t request = get_request_type(m);
+	request = get_request_type(m);
 	switch(request){
 		case GET:
-			return GET_response(m);
+			out = GET_response(m);
 		case POST:
-			puts("Received a POST request!");
-			return POST_response(m);
+			out = POST_response(m);
 			break;
 		default:
 			break;
 	}
-	return NULL;
+	map_clean(m);
+	return out;
 }	
