@@ -1,4 +1,5 @@
 #include "header.h"
+
 Map parse_HTTP_body(char * body){
 	Vector data = explode("&",body);
 	size_t length = vector_length(data);
@@ -14,10 +15,18 @@ Map parse_HTTP_body(char * body){
 }
 
 Map parse_HTTP_message(char * message){
+	char * directory;
+	Map out = NULL;
+	char *  data;
+	if(is_PHP_request(message,&directory)){
+		map_add(&out,"SIZE",run_CGI(message,directory,&data),ULONGINT_TYPE);
+		map_add(&out,"PHP_CGI",data,STRING_TYPE);
+		return out;
+	}
 	if(strpos(message,"GET")==0){
 		return parse_HTTP_header(message);
 	}	
-	Map out = NULL;
+	
 	Vector v = ssplit("\r\n\r\n",message);
 	if(vector_length(v)!=2){
 		printf("Unexpected vector length of  %lu\n",vector_length(v));
@@ -186,6 +195,9 @@ uint8_t get_request_type(Map m){
 }
 
 Response build_response(Map m){
+	if(map_has_key(m,"PHP_CGI")){
+		return CGI_response(m);
+	}
 	if(1 != check_valid_params(m)){
 		//handle the error here
 	}

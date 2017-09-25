@@ -1,10 +1,10 @@
 
 
-CFLAGS += -Wall -Werror --pedantic -lm -lssl -lcrypto
+CFLAGS += -Wall -Werror --pedantic -lm -lssl -lcrypto -pthread
 CC= gcc
 LIB = -I /usr/local/lib/
 CFLAGS =  -pthread $(LIB) $(INCLUDE)
-FILES = ./*.c ./include/*.c
+FILES = ./*.c ./include/*.c ./include/CGI/*.c
 OBJECTS= $(foreach x, $(basename $(wildcard *.c)), $(x).o)
 .PHONY: clean
 

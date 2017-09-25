@@ -12,13 +12,11 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <netdb.h> /* struct hostent, gethostbyname */
+#include "concurrency.h"
 #include "str.h"
 #include "vector.h"
 #include "map.h"
-#include "header.h"
-#include "response.h"
 #include <signal.h>
-#include "io.h"
 /*#include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -26,8 +24,8 @@
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>*/
 #include <resolv.h>
-#include "base64.h"
 #include "client.h"
+
 
 #ifndef TRUE
 #define TRUE   1

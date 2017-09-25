@@ -17,31 +17,27 @@ int main(){
 	int master_socket , addrlen , new_socket, activity, i , valread , sd;
 	int max_sd;
 	int port = 8989;
-	int j;
 	struct sockaddr_in address;
 	char buffer[BUFFER_SIZE];  
 	fd_set readfds;
 	int cons = 0;
-	char * out;
 
 	signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
+
 	if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) {
 		perror("socket failed");
 		exit(EXIT_FAILURE);
 	}
-  
-	
+ 
 	if(setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 ){
 		perror("setsockopt");
 		exit(EXIT_FAILURE);
 	}
-  
-	
+ 	
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons( port );
-	  
 	
 	if (bind(master_socket, (struct sockaddr *)&address, sizeof(address))<0) {
 		perror("bind failed");
@@ -99,16 +95,15 @@ int main(){
 					close(sd);
 					i = 0;
 				}else{
-					for (j = 0; j < cons; j++){
-						active_client = (Client)vector_get(clients,i);
-						sd = active_client->fd;
-						/*printf("The socket number for this message is %i\n",sd);*/
-						buffer[valread] = '\0';
-						last_input = buffer;
-						respond(sd,build_response(parse_HTTP_message(buffer)));
-						//print_map_contents(headers);
-						//write(0, buffer, strlen(buffer));
-					}
+					
+					active_client = (Client)vector_get(clients,i);
+					/*printf("The socket number for this message is %i\n",sd);*/
+					buffer[valread] = '\0';
+					last_input = buffer;
+					create_new_thread(active_client,buffer);
+					//print_map_contents(headers);
+					//write(0, buffer, strlen(buffer));
+					
 					
 				}
 			}

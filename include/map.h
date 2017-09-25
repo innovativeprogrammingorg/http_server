@@ -69,4 +69,8 @@ void print_map_contents(Map m);
 #define COOKIE_TYPE 5
 #endif
 
+#ifndef ULONGINT_TYPE
+#define ULONGINT_TYPE 6
+#endif
+
 #endif

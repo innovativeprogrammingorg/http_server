@@ -4,8 +4,6 @@
 #include "str.h"
 #include "map.h"
 
-
-
 struct response{
 	char* header;
 	char* body;

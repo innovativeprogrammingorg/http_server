@@ -5,6 +5,8 @@
 #include "vector.h"
 #include "map.h"
 #include "response.h"
+#include "request.h"
+#include "./CGI/CGI.h"
 
 #include <stdio.h>
 #include <time.h>

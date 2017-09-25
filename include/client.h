@@ -8,15 +8,7 @@
 #include "vector.h"
 #include "map.h"
 #include "str.h"
-
-typedef struct client * Client;
-
-struct client{
-	char* ip;
-	int port;
-	int fd;
-	Map cookies;
-};
+#include "data_types.h"
 
 
 Client new_client(int fd,char* ip,int port);
