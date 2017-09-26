@@ -1,8 +1,8 @@
 #include "CGI.h"
 
-void start_PHP_script(char* script,int port){
+void start_PHP_CGI(int port){
 	if(!fork()){
-		char* args[5] = {"-f",script,"-b",concat("127.0.0.1:",itoa(port),FALSE),NULL};
+		char* args[3] = {"-b",concat("127.0.0.1:",itoa(port),FALSE),NULL};
 		execv("/usr/bin/php",args);
 		exit(EXIT_SUCCESS);
 	}
@@ -12,7 +12,7 @@ uint64_t* run_CGI(char* message,char* script,char ** data){
 	int opt = TRUE;
 	int master_socket , addrlen , new_socket, valread;
 	int max_sd;
-	int port = 8988;
+	int port = 8777;
 	struct sockaddr_in address;
 	char buffer[BUFFER_SIZE];  
 	fd_set readfds;

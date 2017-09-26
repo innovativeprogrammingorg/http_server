@@ -4,23 +4,22 @@ Map parse_HTTP_body(char * body){
 	Vector data = explode("&",body);
 	size_t length = vector_length(data);
 	Map out = NULL;
-	uint64_t i;
+	uint_fast64_t i;
 	Vector pair;
 	for(i = 0;i<length;i++){
 		pair = split('=',(char*)vector_get(data,i));
 		map_add(&out,vector_get(pair,0),vector_get(pair,1),STRING_TYPE);
 		vector_clean(pair);
 	}
-	vector_clean(data);
 	return out;
 }
 
 Map parse_HTTP_message(char * message){
-	/*char * directory;
-	char *  data;*/
 	Map out = NULL;
-	Vector v;
-	/*if(is_PHP_request(message,&directory)){
+	/*
+	char* directory;
+	char*  data;
+	if(is_PHP_request(message,&directory)){
 		map_add(&out,"SIZE",run_CGI(message,directory,&data),ULONGINT_TYPE);
 		map_add(&out,"PHP_CGI",data,STRING_TYPE);
 		return out;
@@ -28,67 +27,72 @@ Map parse_HTTP_message(char * message){
 	if(strpos(message,"GET")==0){
 		return parse_HTTP_header(message);
 	}
-	v = ssplit("\r\n\r\n",message);
+	
+	Vector v = ssplit("\r\n\r\n",message);
 	if(vector_length(v)!=2){
 		printf("Unexpected vector length of  %lu\n",vector_length(v));
 		//exit(0);
 	}
-	map_add(&out,"HEADER",parse_HTTP_header((char*)vector_get(v,0)),MAP_TYPE);
-	map_add(&out,"BODY",parse_HTTP_body((char*)vector_get(v,1)),MAP_TYPE);
-	vector_clean(v);
-	free(message);
+	Map header = parse_HTTP_header(vector_get(v,0));
+	
+	
+	map_add(&out,"HEADER",header,MAP_TYPE);
+	map_add(&out,"BODY",parse_HTTP_body(vector_get(v,1)),MAP_TYPE);
 	return out;
 }
-Map parse_HTTP_header(char* header){
+Map parse_HTTP_header(char * header){
 	/*puts("Parsing the HTTP header");*/
 	//printf("\n\n\n\n%s\n\n\n\n",header);
 	Vector parameters = explode("\r\n",header);
 	size_t length = vector_length(parameters);
-	uint32_t i = 0;
+	uint_fast32_t i = 0;
 	Map out = NULL;
 	char* key;
 	void* value;
 	void* tmp;
-	Vector arr = NULL;
+	Vector arr;
 	Vector key_value_pair = NULL;
 	//puts("Parsing the parameters...");
 	for(i = 0;i<length;i++){
 		//printf("Parsing parameter %d/%lu\n",i,length);
 		if(i == 0){
+			key = "REQUEST";
 			tmp = (char*)vector_get(parameters,i);
-			value = (char*)calloc(sizeof(char*),strlen(tmp)+1);
-			strcpy(value,tmp);
-			map_add(&out,"REQUEST",value,STRING_TYPE);
+			value = calloc(sizeof(char*),strlen(tmp) + 1);
+			strcpy((char*)value,tmp);
+			map_add(&out,key,value,STRING_TYPE);
 			continue;
-		}else{
-			key_value_pair = split(':',vector_get(parameters,i));
-			key = trim((char*)vector_get(key_value_pair,0));
-			tmp = (char*)vector_get(key_value_pair,1);
-			value = (char*)calloc(sizeof(char*),strlen(tmp) + 1);
-			strcpy(value,tmp);
-			value = trim(value);
-			//printf("Value is %s\n",(char*)value);
-			if(strpos(key,"User-Agent")!=-1){
-				map_add(&out,key,value,STRING_TYPE);
-			}else if(indexOfChar((char*)value,';')!=-1){
-				/*puts("Value is an array delim = ;");
-				printf("Key is %s\n",key);*/
-				value =  vector_to_array(explode(";",(char*)value));
-				map_add(&out,key,value,ARRAY_TYPE);
-			}else if(indexOfChar((char*)value,',')!=-1){
-				/*puts("Value is an array delim = ,");
-				printf("Key is %s\n",key);*/
-				arr = explode(",",(char*)value);
-				value = vector_to_array(arr);
-				vector_clean(arr);
-				map_add(&out,key,value,ARRAY_TYPE);
-			}else{
-				map_add(&out,key,value,STRING_TYPE);
-				//printf("Added %s:%s\n",key,(char*)value);
-			}
-			free(key);
-			vector_clean(key_value_pair);
 		}
+		key_value_pair = split(':',vector_get(parameters,i));
+
+		key = trim((char*)vector_get(key_value_pair,0));
+		value = trim((char*)vector_get(key_value_pair,1));
+		
+		//printf("Value is %s\n",(char*)value);
+		if(strpos(key,"User-Agent")!=-1){
+			map_add(&out,key,value,STRING_TYPE);
+			//printf("Added %s:%s\n",key,(char*)value);
+		}else if(indexOfChar((char*)value,';')!=-1){
+			/*puts("Value is an array delim = ;");
+			printf("Key is %s\n",key);*/
+			arr = explode(";",(char*)value);
+			value =  vector_to_array(arr);
+			vector_free(arr);
+			map_add(&out,key,value,ARRAY_TYPE);
+		}else if(indexOfChar((char*)value,',')!=-1){
+			/*puts("Value is an array delim = ,");
+			printf("Key is %s\n",key);*/
+			arr = explode(",",(char*)value);
+			value =  vector_to_array(arr);
+			vector_free(arr);
+			map_add(&out,key,value,ARRAY_TYPE);
+		}else{
+			map_add(&out,key,value,STRING_TYPE);
+			//printf("Added %s:%s\n",key,(char*)value);
+		}
+		free(key);
+		vector_clean(key_value_pair);
+		
 	}
 	vector_clean(parameters);
 	return out;
@@ -152,8 +156,7 @@ char* get_accept_ranges_line(){
 }
 
 char* get_connection_line(Map header){
-	char* conn = (char*)map_value_at(header,"Connection");
-	return concat("Connection: ",concat(conn,"\r\n",FALSE),SECOND);
+	return concat("Connection: ",concat((char*)map_value_at(header,"Connection"),"\r\n",FALSE),SECOND);
 }
 
 uint16_t check_valid_params(Map m){
@@ -174,6 +177,10 @@ uint8_t get_request_type(Map m){
 	char* status_line = (char*)map_value_at(m,"REQUEST");
 	if(!status_line){
 		status_line = (char*)map_value_at((Map)map_value_at(m,"HEADER"),"REQUEST");
+	}
+	if(!status_line){
+		puts("An unknown error occured");
+		return UNKNOWN;
 	}
 	if(strpos(status_line,"GET")==0){
 		return GET;
@@ -200,20 +207,23 @@ uint8_t get_request_type(Map m){
 }
 
 Response build_response(Map m){
-	Response out = NULL;
-	uint8_t request;
+	Response out;
 	/*if(map_has_key(m,"PHP_CGI")){
 		return CGI_response(m);
 	}*/
 	if(1 != check_valid_params(m)){
-		//handle the error here
+		out = e400_response(m);
+		map_clean(m);
+		return out;
 	}
-	request = get_request_type(m);
+	uint8_t request = get_request_type(m);
 	switch(request){
 		case GET:
 			out = GET_response(m);
+			break;
 		case POST:
-			out = POST_response(m);
+			puts("Received a POST request!");
+			out =  POST_response(m);
 			break;
 		default:
 			break;

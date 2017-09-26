@@ -139,7 +139,7 @@ char* substr_r(char * subject,int index){
 	return out;
 }
 
-char* substr(char * subject,int index){
+char* substr(char* subject,int index){
 	if(index<0){
 		return substr_r(subject,index);
 	}
@@ -256,6 +256,9 @@ int indexOfChar(char * haystack, char needle){
 	return -1;
 }
 
+char * ktrim(char* str){
+	return trim(str);
+}
 char * trim(char* str){
 	register uint_fast64_t start = 0;
 	register uint_fast64_t end = strlen(str);
@@ -269,9 +272,7 @@ char * trim(char* str){
 		printf("ERROR was found when trimming: %s\n",str);
 		exit(EXIT_FAILURE);
 	}
-	char* out = substring(str,start,end-start);
-	free(str);
-	return out;
+	return substring(str,start,end-start);
 }
 
 

@@ -17,7 +17,7 @@
 #include "../data_types.h"
 #include "../client.h"
 
-void start_PHP_script(char* script,int port);
+void start_PHP_CGI(int port);
 uint64_t* run_CGI(char* message,char* script,char ** data);
 Response CGI_response(Map m);
 

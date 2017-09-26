@@ -24,12 +24,14 @@ char * get_content_type(char* directory){
 	char* command = concat("/usr/bin/file -i ",directory,FALSE);
 	FILE* fd = popen(command,"r");
 	char* file_type;
+	Vector v;
+
+	free(command);
 	if(!fread_file(fd,&file_type)){
-		puts("Error getting file type.");
-		puts("Aborting");
+		puts("Error getting file type.\nAborting");
 		exit(EXIT_FAILURE);
 	}
-	Vector v = split(':',file_type);
+	v = split(':',file_type);
 	free(file_type);
 	file_type = vector_get(v,1);
 	if(indexOfChar(file_type,';')!=-1){
@@ -52,7 +54,7 @@ void create_tmp_file(char* directory){
 
 
 uint64_t sread_file(char* directory,char** data){
-	char* buffer = (char*)calloc(sizeof(char),200);
+	char buffer[200];
 	char* dat = NULL;
 	size_t n;
 	uint64_t out = 0;
@@ -61,20 +63,17 @@ uint64_t sread_file(char* directory,char** data){
 		create_tmp_file(directory);
 	}*/
 	FILE* fd =  fopen(src,"r");
-	printf("reading the contents of the file...");
+	/*printf("reading the contents of the file...");*/
 	while(!feof(fd)){
-		n = fread(buffer,sizeof(char),199,fd);
-		if(dat != NULL){
-			dat = concat(dat,buffer,FIRST);
-		}else{
-			dat = concat(dat,buffer,FALSE);
-		}
-		out += n;
 		memset(buffer,'\0',200);
+		n = fread(buffer,sizeof(char),199,fd);
+		dat = concat(dat,buffer,(dat)? FIRST : FALSE);
+		out += n;
 	}
 	*data = dat;
 	printf("done\n");
 	fclose(fd);
+	free(src);
 	return out;
 }
 uint64_t prepare_media(char* directory,char** data){
@@ -85,39 +84,32 @@ uint64_t prepare_media(char* directory,char** data){
 	char* src = concat("./www",directory,FALSE);
 	FILE* fd =  fopen(src,"r");
 	size_t n;
-	char* buffer = (char*)calloc(sizeof(char),200);
+	char buffer[200];
 	char* dat = NULL;
 	uint64_t out = 0;
 	while(!feof(fd)){
-		n = fread(buffer,sizeof(char),199,fd);
-		if(dat != NULL){
-			dat = force_concat(dat,out,buffer,n,FIRST);
-		}else{
-			dat = force_concat(NULL,0,buffer,n,FALSE);
-		}
-		out += n;
 		memset(buffer,'\0',200);
+		n = fread(buffer,sizeof(char),199,fd);
+		dat = force_concat(dat,out,buffer,n,(dat != NULL)? FIRST : FALSE);
+		out += n;	
 	}
 	*data = dat;
 	fclose(fd);
-
+	free(src);
 	return out;
 }
 
 uint64_t fread_file(FILE* fd,char** data){
-	char* buffer = (char*)calloc(sizeof(char),200);
+	char buffer[200];
 	char* dat = NULL;
 	size_t n;
 	uint64_t out = 0;
 	while(!feof(fd)){
-		n = fread(buffer,sizeof(char),199,fd);
-		if(dat != NULL){
-			dat = concat(dat,buffer,FIRST);
-		}else{
-			dat = concat(dat,buffer,FALSE);
-		}
-		out += n;
 		memset(buffer,'\0',200);
+		n = fread(buffer,sizeof(char),199,fd);
+		dat = concat(dat,buffer,(dat)? FIRST : FALSE);
+		out += n;
+		
 	}
 	*data = dat;
 	fclose(fd);
@@ -125,16 +117,14 @@ uint64_t fread_file(FILE* fd,char** data){
 }
 
 uint64_t read_file(int fd,char** data){
-	char* buffer = (char*)calloc(sizeof(char),200);
+	char buffer[200];
 	char* dat = NULL;
 	ssize_t n;
 	uint64_t out = 0;
+	memset(buffer,'\0',200);
+
 	while((n = read(fd,buffer,199))){
-		if(dat != NULL){
-			dat = concat(dat,buffer,FIRST);
-		}else{
-			dat = concat(dat,buffer,FALSE);
-		}
+		dat = concat(dat,buffer,(dat)? FIRST : FALSE);
 		out += n;
 		memset(buffer,'\0',200);
 	}
@@ -152,19 +142,18 @@ void srespond(int fd, char* data){
 	printf("Sending %ld bytes of data to the client...",size);
 	while(size>0){
 		if(size>=chunk_size){
-			buffer = substring(data,chunk*chunk_size,size);
-			write(fd,buffer,chunk_size);
-			free(buffer);
-		}else{
-			
 			buffer = substring(data,chunk*chunk_size,chunk_size);
+			write(fd,buffer,chunk_size);
+		}else{
+			buffer = substring(data,chunk*chunk_size,size);
 			write(fd,buffer,size);
-			free(buffer);
 		}
-		size = size - chunk_size;
+		free(buffer);
+		size -=  chunk_size;
 		chunk++;
 	}
 	puts("done");
+	free(data);
 }
 void force_print(char* in,size_t length){
 	uint64_t i;
@@ -183,19 +172,24 @@ void respond(int fd, Response r){
 	printf("Sending %ld bytes of data to the client...",size);
 	while(size>0){
 		if(size>=chunk_size){
-			buffer = substring(r->body,chunk*chunk_size,size);
-			write(fd,buffer,chunk_size);
-			free(buffer);
-		}else{
-			
 			buffer = substring(r->body,chunk*chunk_size,chunk_size);
+			write(fd,buffer,chunk_size);
+		}else{
+			buffer = substring(r->body,chunk*chunk_size,size);
 			write(fd,buffer,size);
-			free(buffer);
 		}
+		free(buffer);
 		size = size - chunk_size;
 		chunk++;
 	}
 	puts("done");
+	if(r->body){
+		free(r->body);
+	}
+	if(r->header){
+		free(r->header);
+	}
+	free(r);
 	/*puts("DATA sent is ______________________________");
 	force_print(r->body,r->data_size);
 	puts("_____________________________");*/

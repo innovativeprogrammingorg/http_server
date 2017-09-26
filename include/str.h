@@ -34,7 +34,7 @@ int indexOfChar(char * haystack, char needle);
 char * trim(char* str);
 char* str_replace(char* search,char* replace,char* subject);
 
-
+char* ktrim(char* str);
 
 #define TRUE 1
 #define FALSE 0

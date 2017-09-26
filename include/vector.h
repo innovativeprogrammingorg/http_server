@@ -13,7 +13,17 @@ struct vect{
 };
 size_t vector_length(Vector v);
 void* vector_get(Vector v,size_t index);
+/**
+ * Frees the vector structs and data
+ * @param v [description]
+ */
 void vector_clean(Vector v);
+
+/**
+ * Frees just the vector structs
+ * @param v [description]
+ */
+void vector_free(Vector v);
 void vector_push(Vector* v,void* data);
 Vector vector_merge(Vector* v1, Vector* v2);
 void vector_pop(Vector* v, size_t index);

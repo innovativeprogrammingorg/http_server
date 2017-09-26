@@ -49,20 +49,39 @@ void map_add(Map* m, char* key, void* value,uint8_t type){
 void map_clean(Map m){
 	Meta tmp;
 	Meta clear = NULL;
+	uint64_t i;
 	if(m==NULL){
 		return;
 	}
 	tmp = m->head;
-	while(tmp->next != NULL){
+	while(tmp != NULL){
+		
+		clear = tmp;
 		tmp = tmp->next;
-		clear = tmp->prev;
+
 		clear->next = NULL;
 		clear->prev = NULL;
-		free(clear->value);
+		switch(clear->type){
+			case MAP_TYPE:
+				map_clean(clear->value);
+				break;
+			case ARRAY_TYPE:
+				 i = 0;
+				while( (((void**)clear->value)[i]) ){
+					free( (((void**)clear->value)[i]) );
+					i++;
+				}
+				free(clear->value);
+				break;
+			default:
+				free(clear->value);
+		}
+		
 		free(clear->key);
 		clear->value = NULL;
 		clear->key = NULL;
 		free(clear);
+		
 	}
 	free(tmp);
 	free(m);

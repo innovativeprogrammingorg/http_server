@@ -15,7 +15,7 @@ int main(){
 	fd_set readfds;
 	int cons = 0;
 	Client c;
-
+	start_PHP_CGI(8888);
 	signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
 

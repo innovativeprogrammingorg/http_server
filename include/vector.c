@@ -88,6 +88,25 @@ void vector_clean(Vector v){
 		return;
 	}
 	
+	while(tmp != NULL){
+		
+		clear = tmp;
+		tmp = tmp->next;
+		clear->next = NULL;
+		clear->prev = NULL;
+		if(clear->data)
+			free(clear->data);
+		free(clear);
+	}
+}
+
+void vector_free(Vector v){
+	Vector tmp = v;
+	Vector clear = NULL;
+	if(v==NULL){
+		return;
+	}
+	
 	while(tmp->next != NULL){
 		tmp = tmp->next;
 		clear = tmp->prev;
