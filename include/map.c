@@ -61,21 +61,24 @@ void map_clean(Map m){
 
 		clear->next = NULL;
 		clear->prev = NULL;
-		switch(clear->type){
-			case MAP_TYPE:
-				map_clean(clear->value);
-				break;
-			case ARRAY_TYPE:
-				 i = 0;
-				while( (((void**)clear->value)[i]) ){
-					free( (((void**)clear->value)[i]) );
-					i++;
-				}
-				free(clear->value);
-				break;
-			default:
-				free(clear->value);
+		if(clear->value){
+			switch(clear->type){
+				case MAP_TYPE:
+					map_clean(clear->value);
+					break;
+				case ARRAY_TYPE:
+					 i = 0;
+					while( (((void**)clear->value)[i]) ){
+						free( (((void**)clear->value)[i]) );
+						i++;
+					}
+					free(clear->value);
+					break;
+				default:
+					free(clear->value);
+			}
 		}
+		
 		
 		free(clear->key);
 		clear->value = NULL;

@@ -44,7 +44,7 @@ char * get_content_type(char* directory){
 
 void create_tmp_file(char* directory){
 	puts("Creating the tmp file");
-	char* src = concat("./www",directory,FALSE);
+	char* src = concat(WEB_ROOT,directory,FALSE);
 	char* dest = concat("./tmp",concat(directory,".gz",FALSE),SECOND);
 	char * command = concat("gzip -c ",concat(src,concat(" > ",dest,SECOND),FIRST|SECOND),SECOND);
 	system(command);
@@ -54,19 +54,19 @@ void create_tmp_file(char* directory){
 
 
 uint64_t sread_file(char* directory,char** data){
-	char buffer[200];
+	char buffer[FILE_BUFFER_SIZE];
 	char* dat = NULL;
 	size_t n;
 	uint64_t out = 0;
-	char* src = concat("./www",directory,FALSE);
+	char* src = concat(WEB_ROOT,directory,FALSE);
 	/*if(access(src,F_OK)==-1){
 		create_tmp_file(directory);
 	}*/
 	FILE* fd =  fopen(src,"r");
 	/*printf("reading the contents of the file...");*/
 	while(!feof(fd)){
-		memset(buffer,'\0',200);
-		n = fread(buffer,sizeof(char),199,fd);
+		memset(buffer,'\0',FILE_BUFFER_SIZE);
+		n = fread(buffer,sizeof(char),FILE_BUFFER_SIZE - 1,fd);
 		dat = concat(dat,buffer,(dat)? FIRST : FALSE);
 		out += n;
 	}
@@ -81,15 +81,15 @@ uint64_t prepare_media(char* directory,char** data){
 	/*if(access(src,F_OK)==-1){
 		create_tmp_file(directory);
 	}*/
-	char* src = concat("./www",directory,FALSE);
+	char* src = concat(WEB_ROOT,directory,FALSE);
 	FILE* fd =  fopen(src,"r");
 	size_t n;
-	char buffer[200];
+	char buffer[FILE_BUFFER_SIZE];
 	char* dat = NULL;
 	uint64_t out = 0;
 	while(!feof(fd)){
-		memset(buffer,'\0',200);
-		n = fread(buffer,sizeof(char),199,fd);
+		memset(buffer,'\0',FILE_BUFFER_SIZE);
+		n = fread(buffer,sizeof(char),FILE_BUFFER_SIZE - 1,fd);
 		dat = force_concat(dat,out,buffer,n,(dat != NULL)? FIRST : FALSE);
 		out += n;	
 	}
@@ -100,13 +100,13 @@ uint64_t prepare_media(char* directory,char** data){
 }
 
 uint64_t fread_file(FILE* fd,char** data){
-	char buffer[200];
+	char buffer[FILE_BUFFER_SIZE];
 	char* dat = NULL;
 	size_t n;
 	uint64_t out = 0;
 	while(!feof(fd)){
-		memset(buffer,'\0',200);
-		n = fread(buffer,sizeof(char),199,fd);
+		memset(buffer,'\0',FILE_BUFFER_SIZE);
+		n = fread(buffer,sizeof(char),FILE_BUFFER_SIZE - 1,fd);
 		dat = concat(dat,buffer,(dat)? FIRST : FALSE);
 		out += n;
 		
@@ -117,16 +117,16 @@ uint64_t fread_file(FILE* fd,char** data){
 }
 
 uint64_t read_file(int fd,char** data){
-	char buffer[200];
+	char buffer[FILE_BUFFER_SIZE];
 	char* dat = NULL;
 	ssize_t n;
 	uint64_t out = 0;
-	memset(buffer,'\0',200);
+	memset(buffer,'\0',FILE_BUFFER_SIZE);
 
-	while((n = read(fd,buffer,199))){
+	while((n = read(fd,buffer,FILE_BUFFER_SIZE - 1))){
 		dat = concat(dat,buffer,(dat)? FIRST : FALSE);
 		out += n;
-		memset(buffer,'\0',200);
+		memset(buffer,'\0',FILE_BUFFER_SIZE);
 	}
 	*data = dat;
 	close(fd);

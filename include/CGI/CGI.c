@@ -3,7 +3,7 @@
 void start_PHP_CGI(int port){
 	if(!fork()){
 		char* args[3] = {"-b",concat("127.0.0.1:",itoa(port),FALSE),NULL};
-		execv("/usr/bin/php",args);
+		execv("/usr/bin/php-cgi",args);
 		exit(EXIT_SUCCESS);
 	}
 }
@@ -24,14 +24,12 @@ uint64_t* run_CGI(char* message,char* script,char ** data){
 		perror("socket failed");
 		exit(EXIT_FAILURE);
 	}
-  
 	
 	if(setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, sizeof(opt)) < 0 ){
 		perror("setsockopt");
 		exit(EXIT_FAILURE);
 	}
-  
-	
+ 
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons( port );
@@ -48,7 +46,6 @@ uint64_t* run_CGI(char* message,char* script,char ** data){
 		exit(EXIT_FAILURE);
 	}
 	/*puts("Listener created successfully");*/
-	start_PHP_script(script,port);
 	addrlen = sizeof(address);	 
 	while(TRUE){
 		FD_ZERO(&readfds);
@@ -61,7 +58,6 @@ uint64_t* run_CGI(char* message,char* script,char ** data){
 			if(c->fd > max_sd)
 				max_sd = c->fd;
 		}
-		
 		
   		/*printf("The max process id is %i\n",max_sd);*/
 		if ((select(max_sd + 1 , &readfds , NULL , NULL , NULL) < 0) && (errno!=EINTR)) {
@@ -92,13 +88,8 @@ uint64_t* run_CGI(char* message,char* script,char ** data){
 				/*printf("The socket number for this message is %i\n",c->fd);*/
 				buffer[valread] = '\0';
 				out = concat(out,buffer,(out)? FIRST : FALSE);
-				//print_map_contents(headers);
-				//write(0, buffer, strlen(buffer));
-				
-				
 			}
 		}
-		
 		memset(&buffer,0,BUFFER_SIZE);
 	}
 	return NULL;

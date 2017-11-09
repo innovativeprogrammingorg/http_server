@@ -8,6 +8,7 @@ char* parse_PHP_args(Map args){
 		out = concat(out,concat(concat(keys[i],concat("=",map_value_at(args,keys[i]),FALSE),FIRST|SECOND)," ",FIRST),(out)? FIRST | SECOND : SECOND);
 		i++;
 	}
+	free(keys);
 	return out;
 
 }
@@ -18,5 +19,6 @@ char* process_through_PHP(Map _POST,char* dir){
 	if(!fread_file(fd,&body)){
 		return NULL;
 	}
+	free(command);
 	return body;
 }

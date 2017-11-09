@@ -25,7 +25,7 @@
 #include <openssl/x509_vfy.h>*/
 #include <resolv.h>
 #include "client.h"
-
+#include "./CGI/CGI.h"
 
 #ifndef TRUE
 #define TRUE   1

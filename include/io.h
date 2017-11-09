@@ -27,4 +27,12 @@ void srespond(int fd, char * data);
 void respond(int fd, Response r);
 void force_print(char* in,size_t length);
 
+#ifndef FILE_BUFFER_SIZE
+#define FILE_BUFFER_SIZE 1000000
+#endif
+
+#ifndef WEB_ROOT
+#define WEB_ROOT "./www"
+#endif
+
 #endif

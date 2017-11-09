@@ -6,11 +6,20 @@ Map parse_HTTP_body(char * body){
 	Map out = NULL;
 	uint_fast64_t i;
 	Vector pair;
+	char* value;
+	char* tmp;
 	for(i = 0;i<length;i++){
 		pair = split('=',(char*)vector_get(data,i));
-		map_add(&out,vector_get(pair,0),vector_get(pair,1),STRING_TYPE);
+		
+		tmp = (char*)vector_get(pair,1);
+		value = (char*)calloc(sizeof(char*),strlen(tmp) + 1);
+
+		strcpy(value,tmp);
+
+		map_add(&out,vector_get(pair,0),value,STRING_TYPE);
 		vector_clean(pair);
 	}
+	vector_clean(data);
 	return out;
 }
 
@@ -38,6 +47,7 @@ Map parse_HTTP_message(char * message){
 	
 	map_add(&out,"HEADER",header,MAP_TYPE);
 	map_add(&out,"BODY",parse_HTTP_body(vector_get(v,1)),MAP_TYPE);
+	vector_clean(v);
 	return out;
 }
 Map parse_HTTP_header(char * header){
@@ -76,6 +86,7 @@ Map parse_HTTP_header(char * header){
 			/*puts("Value is an array delim = ;");
 			printf("Key is %s\n",key);*/
 			arr = explode(";",(char*)value);
+			free(value);
 			value =  vector_to_array(arr);
 			vector_free(arr);
 			map_add(&out,key,value,ARRAY_TYPE);
@@ -83,6 +94,7 @@ Map parse_HTTP_header(char * header){
 			/*puts("Value is an array delim = ,");
 			printf("Key is %s\n",key);*/
 			arr = explode(",",(char*)value);
+			free(value);
 			value =  vector_to_array(arr);
 			vector_free(arr);
 			map_add(&out,key,value,ARRAY_TYPE);
@@ -160,6 +172,9 @@ char* get_connection_line(Map header){
 }
 
 uint16_t check_valid_params(Map m){
+	if(map_has_key(m,"HEADER")){
+		return check_valid_params((Map)map_value_at(m,"HEADER"));
+	}
 	if(!map_has_key(m,"Host")){
 		return 400;
 	}

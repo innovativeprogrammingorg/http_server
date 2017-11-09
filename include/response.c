@@ -51,7 +51,7 @@ Response GET_response(Map header){
 	if(getLast(directory)=='/'){
 		directory = concat(directory,"index.html",FIRST);
 	}
-	src = concat("./www",directory,FALSE);
+	src = concat(WEB_ROOT,directory,FALSE);
 	if(access(src,F_OK)==-1){
 		return e404_response(header);
 	}
@@ -64,14 +64,14 @@ Response GET_response(Map header){
 	if(strpos(content_type,"text")==-1){
 		head = concat(head,get_accept_ranges_line(),FALSE);
 		content_length = prepare_media(directory,&body);
-		//head = concat(head,get_content_encoding_line("gzip"),FIRST);
+		
 		head = concat(head,get_content_type_line(content_type),FIRST|SECOND);
 		head = concat(head,get_date_line(),FIRST|SECOND);
 	}else{
 		content_length = sread_file(directory,&body);
 		head = concat(head,get_date_line(),SECOND);
 	}
-	
+	//head = concat(head,get_content_encoding_line("gzip"),FIRST);
 	head = concat(head,get_content_length_line(content_length),FIRST|SECOND);
 	head = concat(head,get_connection_line(header),FIRST|SECOND);
 	head = concat(head,get_server_line(),FIRST);
@@ -83,7 +83,7 @@ Response GET_response(Map header){
 
 Response POST_response(Map message){
 	char* directory = get_requested_directory((Map)map_value_at(message,"HEADER"));
-	directory = concat("./www",directory,SECOND);
+	directory = concat(WEB_ROOT,directory,SECOND);
 	char* body = process_through_PHP(map_value_at(message,"BODY"),directory);
 	if(body == NULL){
 		return NULL;
@@ -92,7 +92,7 @@ Response POST_response(Map message){
 	char* head = get_status_line(200);
 	head = concat(head,get_date_line(),SECOND);
 	head = concat(head,get_content_length_line(content_length),FIRST|SECOND);
-	head = concat(head,get_connection_line(map_value_at(message,"HEADER")),FIRST);
+	head = concat(head,get_connection_line(map_value_at(message,"HEADER")),FIRST|SECOND);
 	head = concat(head,get_server_line(),FIRST);
 	free(directory);
 	return new_response(head,body,content_length);

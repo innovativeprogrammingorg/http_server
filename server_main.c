@@ -4,7 +4,6 @@ Vector clients = NULL;
 char * last_input = NULL;
 Client active_client = NULL;
 
-
 int main(){
 	int opt = TRUE;
 	int master_socket , addrlen , new_socket, activity, i , valread , sd;
@@ -15,7 +14,7 @@ int main(){
 	fd_set readfds;
 	int cons = 0;
 	Client c;
-	start_PHP_CGI(8888);
+	//start_PHP_CGI(8777);
 	signal(SIGSEGV,segfault_catch);
 	signal(SIGINT,kill_all);
 
@@ -95,7 +94,6 @@ int main(){
 					buffer[valread] = '\0';
 					last_input = buffer;
 					create_new_thread(active_client,buffer);
-					//print_map_contents(headers);
 					//write(0, buffer, strlen(buffer));
 				}
 			}else{
@@ -127,7 +125,8 @@ void segfault_catch(int signum){
 	puts("Server encountered a segmentation fault");
 	printf("The last received is : \n%s \n",last_input);
 	/*printf("Showing the breaks... \n %s\n ",str_replace("\n","<cl>",str_replace("\r\n","<clrf>",last_input)));*/
-	exit(EXIT_FAILURE);
+	execl("./server","./server",NULL);
+	//exit(EXIT_FAILURE);
 }
 
 void kill_all(int signum){
